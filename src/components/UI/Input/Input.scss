@@ -1,0 +1,17 @@
+.input-group {
+    .form-control {
+        border-top-left-radius: 0.2rem !important;
+        border-bottom-left-radius: 0.2rem !important;
+        border-top-right-radius: 0.2rem !important;
+        border-bottom-right-radius: 0.2rem !important;
+        width: 100%;
+    }
+
+    .form-control.invalid {
+        border: 1px solid #dc3545;
+    }
+
+    .form-control.invalid:focus {
+        box-shadow: rgba(220, 53, 69, 0.25) 0px 0px 0px 4px;
+    }
+}

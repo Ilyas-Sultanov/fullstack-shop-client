@@ -1,0 +1,33 @@
+.text-area {
+    & {
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    // .text-area__label {
+        
+    // }
+
+    textarea {
+        border: 1px solid #ced4da;
+        border-radius: 0.2rem;
+        resize: none;
+        width: 100%;
+        flex-grow: 1;
+    }
+
+    textarea:focus {
+        border-color: rgb(134, 183, 254);
+        box-shadow: rgba(13, 110, 253, 0.25) 0px 0px 0px 4px;
+        outline: none;
+    }
+
+    textarea.invalid {
+        border: 1px solid #dc3545;
+    }
+
+    textarea.invalid:focus {
+        box-shadow: rgba(220, 53, 69, 0.25) 0px 0px 0px 4px;
+    }
+}

@@ -1,0 +1,31 @@
+.adminContainer {
+    width: 100%;
+    display: flex;
+    
+    .adminContent {
+        flex-grow: 1;
+        flex-shrink: 1;
+        padding: 10px;
+    }
+
+    .list-group-item {
+        & {
+            background-color: inherit;
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.55);
+            padding: 0.5rem 5px;
+        }
+
+        &:hover {
+            cursor: pointer;
+            -webkit-box-shadow: 0px 0px 5px 5px rgba(255, 255, 255, 0.2) inset;
+            -moz-box-shadow: 0px 0px 5px 5px rgba(255, 255, 255, 0.2) inset;
+            box-shadow: 0px 0px 5px 5px rgba(255, 255, 255, 0.2) inset;
+        }
+    
+        svg {
+            width: 25px;
+            height: 25px;
+        }
+    }
+}

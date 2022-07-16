@@ -1,0 +1,54 @@
+@import "~bootstrap/scss/bootstrap";
+
+html,
+body {
+	height: 100%;
+}
+
+#root {
+    height: 100%;
+}
+
+.App {
+    min-height: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.header {
+    // position: fixed;
+    // z-index: 20;
+    // top: 0;
+    width: 100%;
+    // height: 56px;
+}
+
+main {
+    // padding-top: 56px;
+    // flex-direction: column;
+    flex-grow: 1;
+    display: flex;
+}
+
+.footer {
+    height: 56px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// убираем стрелочки у input type number
+/* Chrome, Safari, Edge, Opera */
+// input::-webkit-outer-spin-button,
+// input::-webkit-inner-spin-button {
+// -webkit-appearance: none;
+// margin: 0;
+// }
+
+// /* Firefox */
+// input[type=number] {
+// -moz-appearance: textfield;
+// }
+// =========

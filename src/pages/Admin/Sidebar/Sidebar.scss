@@ -1,0 +1,49 @@
+.admin__sidebar {
+    & {
+        padding: 10px 15px;
+        // transition: transform .3s ease-in-out;
+        flex-basis: 320px;
+        flex-shrink: 0;
+        flex-grow: 0;
+        // position: relative;
+    }
+   
+
+    @media (max-width: 1024px) {
+        & {
+            flex-basis: auto;
+        }
+        
+        .list-group-item span {
+            display: none;
+        }
+    }
+
+    &.sidebar--show {
+        @media (max-width: 1024px) {
+            // transform: translateX(0);
+        }
+    }
+
+    // .sidebar__header {
+    //     padding: 0.5rem 5px;
+
+    //     @media (min-width: 1025px) {
+    //         display: none !important;
+    //     }
+    // }
+
+    // .sidebar__closeBtn {
+    //     border: none;
+    //     background-color: transparent;
+    //     padding: 0;
+    //     width: 25px;
+    //     height: 25px;
+
+    //     svg {
+    //         fill: #fff;
+    //         width: 100%;
+    //         height: 100%;
+    //     }
+    // }
+}

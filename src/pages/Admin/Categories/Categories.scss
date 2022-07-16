@@ -1,0 +1,165 @@
+.categories {
+    & {
+        overflow: auto;
+        padding: 5px;
+    }
+
+
+
+    // убираем стрелочки у input type number
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+    // =========
+
+
+
+    .input-group {
+        flex-basis: 290px;
+    }
+
+    .form-control {
+        border-top-left-radius: 0.2rem !important;
+        border-bottom-left-radius: 0.2rem !important;
+
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        border-radius: 0.2rem
+    }
+
+    // .create-category {
+
+    // }
+
+    .create-properties__prop, 
+    .edit-properties__prop {
+        position: relative;
+        // transition-duration: scale 0.5s;
+        // Новый пропс не должен скрываться
+
+        .create-properties__content {
+            overflow: hidden;
+            height: 0px;
+        }
+
+        .create-properties__hide-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1;
+            transform: rotate(180deg);
+        }
+    }
+
+    .create-properties__prop {
+        overflow: hidden;
+    }
+
+    .create-properties__prop.show, 
+    .edit-properties__prop.show {
+        .create-properties__content {
+            overflow: initial;
+            height: initial;
+        }
+        
+        .create-properties__hide-icon {
+            transform: rotate(0);
+        }
+    }
+
+    .create-properties__prop.invalid {
+        border: 1px solid #dc3545;
+    }
+
+    .create-properties__hide-icon:hover {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        border-radius: 0.25rem;
+        transition: box-shadow 0.15s ease-in-out;
+        cursor: pointer;
+    }
+
+    .create-category__checkboxes, 
+    .edit-category__checkboxes {
+        display: flex;
+        align-items: center;
+        column-gap: 10px;
+        align-items: initial;
+        flex-wrap: wrap;
+    }
+
+    .edit-category__status-message {
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+
+    .create-properties__prop .card-body, 
+    .edit-properties__prop {
+        background-color: #e7feff;
+    }
+
+    .create-properties__prop .invalid .card-body, 
+    .edit-properties__prop .invalid .card-body  {
+        background-color: #ff9ea6;
+    }
+
+    .create-category__input-settings,
+    .edit-category__input-settings {
+        .title {
+            color: rgb(33, 37, 41);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+        .checkboxes .card-body {
+            display: flex;
+            flex-wrap: wrap;
+            column-gap: 10px;
+        }
+    }
+
+    .create-category__units,
+    .edit-category__units {
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: 10px;
+        align-items: flex-end;
+        justify-content: flex-start;
+
+        .select {
+            flex-basis: initial;
+            width: initial;
+        }
+    }
+
+    .choice {
+        & {
+            flex-wrap: wrap;
+        }
+
+        .card-body {
+            background-color: #f3eecf;
+        }
+    }
+
+    .unit .input-group {
+        flex-basis: initial;
+        margin-right: 10px;
+    }    
+
+    .edit-category .backdrop {
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
+
+    .edit-category__parent-name {
+        display: flex;
+        column-gap: 10px;
+        flex-wrap: wrap;
+    }
+}

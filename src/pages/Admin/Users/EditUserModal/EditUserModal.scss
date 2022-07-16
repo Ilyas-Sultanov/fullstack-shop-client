@@ -1,0 +1,29 @@
+.edit-user-modal {
+    .edit-user-modal__title {
+        font-weight: 700;
+    }
+
+    .input-group {
+        display: block;
+    }
+
+    .input-group > .form-control {
+        width: 100%;
+    }
+
+    .input-group > :not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
+        border-top-left-radius: 0.25rem;
+        border-bottom-left-radius: 0.25rem;
+    }
+    .edit-roles {
+        display: flex;
+        column-gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .validation-message {
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        font-size: 14px;
+        font-weight: 400;
+    }
+}

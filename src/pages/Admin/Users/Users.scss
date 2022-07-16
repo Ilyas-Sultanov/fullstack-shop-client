@@ -1,0 +1,34 @@
+.users-container {
+    .table-responsive {
+        min-height: 200px;
+    }
+
+    .users-table {
+        .input-group > :not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
+            margin-left: 0;
+            border-top-left-radius: 0.2rem; 
+            border-bottom-left-radius: 0.2rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            column-gap: 5px;
+        }
+
+        .btn {
+            word-wrap: normal;
+        }
+
+        .filter-btn {
+            display: flex;
+            justify-content: center;
+        }
+    }
+
+    .chevronIcon--descending {
+        transform: rotate(180deg);
+    }
+}
+

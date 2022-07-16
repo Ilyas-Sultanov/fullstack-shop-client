@@ -1,0 +1,45 @@
+.multilevel-menu {
+    & {
+        box-sizing: border-box;
+        display: inline-flex;
+        flex-direction: column;
+        background-color: rgb(33, 37, 41);
+        color: #fff;
+        padding: 5px 15px;
+    }
+
+    
+    .menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .label {
+        display: block;
+        height: 30px;
+
+        &:hover {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        &.active {
+            background-color: red;
+        }
+    }
+
+    // li {
+       
+    // }
+  
+    .submenus {
+        display: none;
+        border-left: 2px solid #fff;
+        padding-left: 10px;
+    }
+
+    .menu.expanded > li > .submenus {
+        display: block;
+    }        
+}

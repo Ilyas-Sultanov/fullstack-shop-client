@@ -1,0 +1,28 @@
+.brands-modal {
+    & {
+        display: flex;
+    }
+
+    .wrapper {
+        display: flex;
+        width: 287px;
+    }
+
+    .myModal {
+        overflow: initial;
+    }
+
+    .select-with-search {
+        width: 100%;
+    }
+
+    button {
+        height: 31px;
+    }
+
+    svg {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}

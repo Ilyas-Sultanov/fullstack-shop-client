@@ -1,0 +1,207 @@
+// @use 'sass:math';
+$thumbZindex: 3;
+$thumbHeight: 30px;
+$thumbWidth: 30px;
+
+.range-slider {
+    & {
+        display: flex;
+        font-size: inherit;
+    }
+  
+    & * {
+        box-sizing: border-box;
+    }
+  
+    .range-slider__track {
+        border-radius: 4px;
+        background: rgb(194, 194, 194);
+        position: relative;
+    }
+  
+    .thumb {
+        position: absolute;
+        background: rgba(73, 165, 150, 0.5);
+    }
+  
+    .thumb::before {
+        content: '';
+        display: block;
+        height: $thumbHeight;
+        width: $thumbWidth;
+        background: rgba(73, 165, 150, 0.5);
+        border-radius: 50%;
+        position: absolute;
+        z-index: 3;
+        cursor: pointer;
+    }
+  
+    .thumb__tip {
+        position: absolute;
+        padding: 2px 5px;
+        border: 1px solid black;
+        border-radius: 4px;
+        background: #fff;
+        line-height: 1;
+    }
+  
+    .bars-wrapper {
+        border-radius: inherit;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .bar {
+        background: rgb(81, 255, 0);
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        z-index: 1;
+    }
+    
+    .scale__marker {
+        background: #000;
+        position: absolute;
+    }
+  
+    .scale__number {
+        position: absolute;
+        cursor: pointer;
+    }
+}
+  
+  
+.range-slider.horizontal {
+    & {
+        width: 100%;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    &.withTip {
+        margin-top: 40px;
+    }
+
+    &.withScale {
+        margin-bottom: 40px;
+    }
+      
+    .range-slider__track {
+        height: 10px;
+        width: 100%;
+    }
+  
+    .thumb {
+        top: 50%;
+        width: 100%;
+        transform-origin: right center;
+    }
+  
+    .thumb::before {
+        right: - ($thumbWidth/2);
+        top: - ($thumbHeight/2);
+    }
+  
+    .thumb__tip {
+        top: -$thumbHeight * 1.5;
+        right: 0;
+        transform: translateX(50%);
+    }
+    // .thumb__tip {
+    //     top: -$thumbHeight * 1.5;
+    //     right: 0;
+    //     transform: translateX(50%);
+    //     position: absolute;
+    //     overflow: hidden;
+
+    //     input {
+    //         width: 100%;
+    //         border: none;
+    //         outline: none;
+    //         position: absolute;
+    //         top: 0;
+    //         right: 0;
+    //         bottom: 0;
+    //         left: 0;
+    //         z-index: 9999;
+    //     }
+    // }
+    
+    .bar {
+        top: 50%;
+        right: 0;
+        transform-origin: left;
+    }
+  
+    .scale {
+        width: 100%;
+        position: relative;
+        bottom: -$thumbHeight +13;
+    }
+  
+    .scale__marker {
+        width: 2px;
+        height: 5px;
+        transform: translateX(-50%);
+    }
+  
+    .scale__number {
+        top: 100%;
+        transform: translateX(-50%);
+    }
+}
+  
+  
+.range-slider.vertical {
+    & {
+        height: 100%;
+        justify-content: center;
+    }
+      
+    .range-slider__track {
+        width: 10px;
+        height: 100%;
+    }
+   
+    .thumb {
+        left: 50%;
+        bottom: 0;
+        height: 100%;
+        transform-origin: center bottom;
+    }
+  
+    .thumb::before {
+        left: - ($thumbWidth/2);
+        bottom: - ($thumbHeight/2);
+    }
+  
+    .thumb__tip {
+        right: $thumbWidth * 0.75;
+        bottom: 0;
+        transform: translateY(50%);
+    }
+    
+    .bar {
+        transform-origin: bottom;
+    }
+  
+    .scale {
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: $thumbWidth - 5;
+    }
+  
+    .scale__marker {
+        width: 5px;
+        height: 2px;
+        transform: translateY(50%);
+    }
+  
+    .scale__number {
+        left: 15px;
+        transform: translateY(-50%);
+    }
+}

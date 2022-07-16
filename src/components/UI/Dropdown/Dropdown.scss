@@ -1,0 +1,8 @@
+.dropdown {
+    position: relative;
+
+    .collapse {
+        position: absolute;
+        z-index: 15;
+    }   
+}

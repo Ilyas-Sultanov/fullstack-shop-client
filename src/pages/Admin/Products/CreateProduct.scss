@@ -1,0 +1,29 @@
+.create-product {
+    .tree .node__name {
+        padding-left: 25px !important;
+    }
+
+    .tree .node__left-actions input[type="checkbox"] {
+        margin-left: 5px;
+    }
+
+    .category-list-modal.backdrop {
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
+
+    .myModal {
+        margin: 15px;
+    }
+
+    .create-product__category.invalid,
+    .create-product__description.invalid,
+    .create-product__boolean.invalid {
+        & {
+            border: 1px solid #dc3545;
+        }
+        .invalid-feedback {
+            display: block;
+        }
+    }
+}

@@ -1,26 +1,64 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Layout from './components/UI/Layout/Layout';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { checkAuth } from './store/reducers/auth/authActionCreators';
 
-function App() {
+function App() {  
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Layout/>
     </div>
   );
 }
 
 export default App;
+
+
+
+
+
+
+
+
+
+
+
+// import './App.scss';
+// import Header from './components/Header/Header';
+// import Notifications from './components/UI/Notifications/Notifications';
+// import AppRouter from './components/UI/AppRouter/AppRouter';
+// import { RootState } from './store/store';
+// import { useEffect } from 'react';
+// import { useDispatch, useSelector } from 'react-redux';
+// import { checkAuth } from './store/reducers/auth/authActionCreators';
+
+// function App() {  
+//   const notes = useSelector((state: RootState) => state.notifications);
+//   const dispatch = useDispatch();
+//   // const {auth} = useSelector((state: RootState) => state);
+
+//   useEffect(() => {
+//     const token = localStorage.getItem('token');
+//     if (token) {
+//       dispatch(checkAuth());
+//     }
+//   }, [dispatch]);
+
+//   return (
+//     <div className="App">
+//       <Header />
+//       <main>
+//         <AppRouter />
+//       </main>
+//       {notes.length > 0 ? <Notifications /> : ''}
+//     </div>
+//   );
+// }
+
+// export default App;

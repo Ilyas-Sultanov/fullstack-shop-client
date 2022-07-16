@@ -1,0 +1,184 @@
+.date-picker {
+    & {
+        display: inline-block;
+        position: relative;
+    }
+
+    & * {
+        box-sizing: border-box;
+    }
+
+    .inputs {
+        border: 1px solid #ced4da; 
+        border-radius: 0.2rem;
+        padding: 3px 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 31px;
+        position: relative;
+        background-color: #fff;
+    }
+
+    input {
+        outline: none;
+        padding: 0;
+
+        &.invalid {
+            color: red;
+        }
+    }
+
+    input[type='text'] {
+        border: none;
+        position: relative;
+    }
+
+    .inputs__input1 {
+        width: 115px;
+    }
+
+    .inputs__input2 {
+        width: 147px;
+        padding-left: 25px;
+    }
+
+    .inputs__clear-btn {
+        border: none;
+        background-color: transparent;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        right: 0;
+
+        &:hover {
+            -webkit-box-shadow: 0px 0px 5px 5px rgba(0, 101, 167, 0.2) inset;
+            -moz-box-shadow: 0px 0px 5px 5px rgba(0, 101, 167, 0.2) inset;
+            box-shadow: 0px 0px 5px 5px rgba(0, 101, 167, 0.2) inset;
+        }
+    }
+
+    .calendar {
+        width: 290px;
+        position: absolute;
+        top: 35px;
+        padding: 10px 3px 3px 3px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        background-color: #fff;
+    }
+
+    .calendar__header {
+        display: flex;
+        justify-content: center;
+        column-gap: 5px;
+        margin-bottom: 8px;
+    }
+    
+    .calendar__button {
+        border-radius: 5px;
+        border-width: 1px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .calendar__days-of-the-week {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
+    
+    .calendar__day-of-the-week {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .calendar__days-of-the-month {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        justify-items: center;
+        align-content: center;
+    }
+
+    .calendar__day {
+        height: 40px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid transparent;
+
+        &.today {
+            border-color: blue;
+        }
+
+        &.selected {
+            background-color: rgb(98, 170, 98);
+            border-radius: 50%;
+            &.first {
+                border-radius: 50% 0 0 50%;
+            }
+            &.second {
+                border-radius: 0 50% 50% 0;
+            }
+        }
+
+        &.inRange {
+            background-color: lightgreen;
+        }
+
+        &:hover {
+            -webkit-box-shadow: 0px 0px 5px 5px rgba(0, 101, 167, 0.2) inset;
+            -moz-box-shadow: 0px 0px 5px 5px rgba(0, 101, 167, 0.2) inset;
+            box-shadow: 0px 0px 5px 5px rgba(0, 101, 167, 0.2) inset;
+            cursor: pointer;
+        }
+    }
+
+    // display: grid;
+    // grid-template-columns: repeat(7, 1fr);
+    
+    // .calendar .day:hover {
+    //     background-color: #eaeaea;
+    //     cursor: pointer;
+    // }
+    
+    // .calendar .day.selected {
+    //     border: 2px solid dodgerblue;
+    // }
+    
+    // .calendar .day.today {
+    //     background-color: dodgerblue;
+    //     color: white;
+    // }
+    
+    // .calendar .day.today:hover {
+    //     background-color: #0081ff;
+    // }
+    
+    // .calendar .day.today.selected {
+    //     border: 2px solid lightgray;
+    // }
+}
+
+
+
+
+
+
+
+
+// .date-picker {
+//     position: relative;
+
+//     .form-label {
+//         margin-right: 5px;
+//     }
+
+//     .collapse {
+//         position: absolute;
+//     }   
+// }

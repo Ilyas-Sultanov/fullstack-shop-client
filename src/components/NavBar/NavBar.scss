@@ -1,0 +1,66 @@
+.header__navbar {
+    .navbar-collapse {
+        justify-content: space-between;
+
+        @media (max-width: 767px) {
+            top: 56px;
+            left: 0;
+            right: 0;
+            position: absolute;
+            z-index: 999;
+            padding: 0 15px;
+        }
+    }
+
+    .catalog-btn {
+        color: rgba(255, 255, 255, 0.55);
+        width: 100%;
+        display: flex;
+        padding-left: 0;
+        
+        &:hover {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        &:focus {
+            box-shadow: none;
+            
+        }
+
+        &:focus-visible {
+            outline: 1px solid white;
+        }
+    }
+        
+    .auth-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .auth-icon {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .user-btn {
+        &:hover + .dropdown-menu {
+            display: block;
+        }
+    }
+    
+    .dropdown-menu {
+        top: -1px;
+        right: -1px;
+        &:hover {
+            display: block;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .dropdown-menu {
+            right: initial;
+            left: -1px;
+        }
+    }
+}
