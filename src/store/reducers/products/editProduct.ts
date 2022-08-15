@@ -1,7 +1,7 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import { DBBrand } from '../../../types/Brand';
-import { IDBCategory, IUICategory } from '../../../types/CategoryTypes';
-import {IUIProductProperty, IProductProperty, IProductValidationMessages, IDBProduct} from '../../../types/Products';
+import { FilterChoiceValue, IDBCategory, IUICategory } from '../../../types/CategoryTypes';
+import { IProductProperty, IProductValidationMessages, IPreparedForUIProduct, IPreparedForUIProperty} from '../../../types/Products';
 
 interface IEditProductState {
     editProductIsLoading: boolean
@@ -9,20 +9,22 @@ interface IEditProductState {
     isEdited: boolean
     imageFiles: FileList      // FileList (файлы картинок полученные по url ссылкам)
     isShowCategoryListModal: boolean
-    isShowBrandsModal: boolean
     product: {
         _id: string
         name: string
-        category: IDBCategory
         description: string
+        category: IDBCategory
         images: string[]      // Массив url ссылок на файлы
         brand?: DBBrand // undefined когда во удаляем значение из инпута
         price: number
         warranty: number
         quantity?: number
         rating?: number
+        // properties: IUIProductProperty[]
+        properties: Array<IPreparedForUIProperty>
+        createdAt: string
+        updatedAt: string
         validationMessages: IProductValidationMessages
-        properties: IUIProductProperty[]
     }
 }
 
@@ -32,7 +34,6 @@ const initialState: IEditProductState = {
     isEdited: false,
     imageFiles: new DataTransfer().files,
     isShowCategoryListModal: false,
-    isShowBrandsModal: false,
     product: {
         _id: '',
         name: '',
@@ -43,6 +44,7 @@ const initialState: IEditProductState = {
             status: 'leaf',
             parentId: '',
             properties: [],
+            brands: [],
         },
         description: '',
         images: [],
@@ -52,6 +54,8 @@ const initialState: IEditProductState = {
         quantity: 1,
         validationMessages: {},
         properties: [],
+        createdAt: '',
+        updatedAt: '',
     },
 }
 
@@ -62,62 +66,70 @@ const editProductSlice = createSlice({
         setProductIsLoading(state, action:PayloadAction<boolean>) {
             state.editProductIsLoading = action.payload;
         },
-        getProductSuccess(state, action: PayloadAction<IDBProduct>) {
-            const product = action.payload;
-            const category = action.payload.category;
-    
-            if (category.properties && category.properties.length > 0) {
-                const props: IUIProductProperty[] = [];
-                for (let i=0; i<category.properties.length; i+=1) {
-                    props.push({
-                        categoryPropId: category.properties[i]._id!, // если категория типа root или branch, то у неё нет пропсов, поэтому ts ругается, но при создании продукта мы можем выбрать только категорию типа leaf, у которой есть пропсы
-                        value: product.properties.find((prop) => prop.categoryPropId === category.properties![i]._id)!.value,
-                        name: category.properties[i].name,
-                        filterable: category.properties[i].filterable,
-                        filterChoices: category.properties[i].filterChoices,
-                        type: category.properties[i].inputSettings.inputType,
-                        isMultiselect: category.properties[i].inputSettings.isMultiselect,
-                        validationMessages: []
-                    });
-                }
-                state.product._id = product._id;
-                state.product.name = product.name;
-                state.product.category = product.category;
-                state.product.brand = product.brand;
-                state.product.description = product.description;
-                state.product.images = product.images;
-                state.product.price = product.price;
-                state.product.quantity = product.quantity;
-                state.product.warranty = product.warranty;
-                state.product.properties = props;
-            }
+        getProductSuccess(state, action: PayloadAction<IPreparedForUIProduct>) {
+            state.product = action.payload;
         },
+        /**
+         * Это преобразование решил сделать на сервере
+         * т.к. эти данные в том-же виде нужны и для публичной страницы products,
+         * и мне кажется логичнее когда на фронт уже приходят готовые данные.
+         */
+        // getProductSuccess(state, action: PayloadAction<IDBProduct>) {
+        //     const product = action.payload;
+        //     const category = action.payload.category;
+    
+        //     if (category.properties && category.properties.length > 0) {
+        //         const props: IUIProductProperty[] = [];
+        //         for (let i=0; i<category.properties.length; i+=1) {
+        //             props.push({
+        //                 categoryPropId: category.properties[i]._id!, // если категория типа root или branch, то у неё нет пропсов, поэтому ts ругается, но при создании продукта мы можем выбрать только категорию типа leaf, у которой есть пропсы
+        //                 value: product.properties.find((prop) => prop.categoryPropId === category.properties![i]._id)!.value,
+        //                 name: category.properties[i].name,
+        //                 filterable: category.properties[i].filterable,
+        //                 filterChoices: category.properties[i].filterChoices,
+        //                 type: category.properties[i].inputSettings.inputType,
+        //                 isMultiselect: category.properties[i].inputSettings.isMultiselect,
+        //                 validationMessages: []
+        //             });
+        //         }
+        //         state.product._id = product._id;
+        //         state.product.name = product.name;
+        //         state.product.category = product.category;
+        //         state.product.brand = product.brand;
+        //         state.product.description = product.description;
+        //         state.product.images = product.images;
+        //         state.product.price = product.price;
+        //         state.product.quantity = product.quantity;
+        //         state.product.warranty = product.warranty;
+        //         state.product.properties = props;
+        //     }
+        // },
         setIsShowCategoryListModal(state, action:PayloadAction<boolean>) {
             state.isShowCategoryListModal = action.payload;
         },
-        getCategorySuccess(state, action:PayloadAction<IDBCategory>) {
-            const category = action.payload;
-            state.product.category = category;
-            if (category.properties && category.properties.length > 0) {
-                const props: IUIProductProperty[] = [];
-                for (let i=0; i<category.properties.length; i+=1) {
-                    props.push({
-                        categoryPropId: category.properties[i]._id!, // если категория типа root или branch, то у неё нет пропсов, поэтому ts ругается, но при создании продукта мы можем выбрать только категорию типа leaf, у которой есть пропсы
-                        value: category.properties[i].inputSettings.isMultiselect ? // выбранный choice
-                            [] : 
-                            category.properties[i].inputSettings.inputType === 'Boolean' ? 
-                            false : '',
-                        name: category.properties[i].name,
-                        filterable: category.properties[i].filterable,
-                        filterChoices: category.properties[i].filterChoices,
-                        type: category.properties[i].inputSettings.inputType,
-                        isMultiselect: category.properties[i].inputSettings.isMultiselect,
-                        validationMessages: []
-                    });
-                }
-                state.product.properties = props;
-            }
-        },
+        // getCategorySuccess(state, action:PayloadAction<IDBCategory>) { // категорию получаем когда изменяем уже имеющуюся категорию у товара
+        //     const category = action.payload;
+        //     state.product.category = category;
+        //     if (category.properties && category.properties.length > 0) {
+        //         const props: IUIProductProperty[] = [];
+        //         for (let i=0; i<category.properties.length; i+=1) {
+        //             props.push({
+        //                 categoryPropId: category.properties[i]._id!, // если категория типа root или branch, то у неё нет пропсов, поэтому ts ругается, но при создании продукта мы можем выбрать только категорию типа leaf, у которой есть пропсы
+        //                 value: category.properties[i].inputSettings.isMultiselect ? // выбранный choice (у новой категории нет значений для choice, поэтому все значения пустые или false)
+        //                     [] : 
+        //                     category.properties[i].inputSettings.inputType === 'Boolean' ? 
+        //                     false : '',
+        //                 name: category.properties[i].name,
+        //                 filterable: category.properties[i].filterable,
+        //                 filterChoices: category.properties[i].filterChoices,
+        //                 type: category.properties[i].inputSettings.inputType,
+        //                 isMultiselect: category.properties[i].inputSettings.isMultiselect,
+        //                 validationMessages: []
+        //             });
+        //         }
+        //         state.product.properties = props;
+        //     }
+        // },
         setCategory(state, action: PayloadAction<IUICategory>) {
             state.product.category = action.payload;
         },
@@ -158,9 +170,6 @@ const editProductSlice = createSlice({
             if (brand) state.product.brand = brand;
             else state.product.brand = undefined;
         },
-        setIsShowBrandsModal(state, action: PayloadAction<boolean>) {
-            state.isShowBrandsModal = action.payload;
-        },
         setPrice(state, action: PayloadAction<string>) {
             state.product.validationMessages.price = [];
             state.product.price = +action.payload;
@@ -173,7 +182,7 @@ const editProductSlice = createSlice({
             state.product.validationMessages.quantity = [];
             state.product.quantity = +action.payload;
         },
-        setPropValue(state, action: PayloadAction<IProductProperty>) {
+        setPropValue(state, action: PayloadAction<{categoryPropId: string, value: FilterChoiceValue}>) {
             const targetProp = state.product.properties.find((prop) => prop.categoryPropId === action.payload.categoryPropId);
             if (targetProp) {
                 targetProp.validationMessages = [];
@@ -233,7 +242,7 @@ const editProductSlice = createSlice({
                 const props = state.product.properties;
                 for (let i=0; i<props.length; i+=1) {
                     const messages: string[] = [];
-                    if (props[i].type !== 'Boolean' && !props[i].value && props[i].value !== 0) messages.push('Required');
+                    if (props[i].inputSettings.inputType !== 'Boolean' && !props[i].value && props[i].value !== 0) messages.push('Required');
                     props[i].validationMessages = messages;
                     if (messages.length > 0) propsIsValid = false;
                 }

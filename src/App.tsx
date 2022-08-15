@@ -1,4 +1,4 @@
-import Layout from './components/UI/Layout/Layout';
+import Layout from './components/Layout/Layout';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { checkAuth } from './store/reducers/auth/authActionCreators';
@@ -6,9 +6,12 @@ import { checkAuth } from './store/reducers/auth/authActionCreators';
 function App() {  
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(checkAuth());
-  }, [dispatch]);
+  useEffect(
+    function() {
+      dispatch(checkAuth());
+    }, 
+    [dispatch]
+  );
 
   return (
     <div className="App">

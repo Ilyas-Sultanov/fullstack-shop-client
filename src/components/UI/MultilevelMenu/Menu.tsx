@@ -1,44 +1,49 @@
-import {IMultilevelMenu} from "./MultilevelMenu";
-import {useState, MouseEvent, memo} from 'react'
+import {useState, memo} from 'react'
 
-type MenuProps = {
-    menu: IMultilevelMenu
-    onClick: (menu: IMultilevelMenu) => void
-    selectedItem?: IMultilevelMenu
+export interface IMultilevelMenu<T> {
+    name: string
+    _id?: string
+    children: Array<IMultilevelMenu<T>>
+}
+
+type MenuProps<T> = {
+    item: IMultilevelMenu<T>
+    onClick: (item: IMultilevelMenu<T>) => void
+    selectedItem?: IMultilevelMenu<T>
     children?: never
 }
 
-function Menu({menu, selectedItem, onClick}: MenuProps) {
+
+function Menu<T extends IMultilevelMenu<T>>({item, selectedItem, onClick}: MenuProps<T>) {
     const [isExpanded, setIsExpanded] = useState(false);
 
-    function clickHandler(e: MouseEvent<HTMLSpanElement>) {
+    function clickHandler() {
         setIsExpanded(!isExpanded);
-        onClick(menu);
+        onClick(item); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! отсюда можно запустить callback
     }
    
-
     return (
         <ul 
             className={`menu ${isExpanded ? 'expanded' : ''}`}
         >
             <li>
                 <span 
-                    className={`label ${selectedItem && selectedItem.name === menu.name ? 'active' : ''}`}
-                    onClick={clickHandler}
+                    className={`label ${selectedItem && selectedItem.name === item.name ? 'active' : ''}`}
+                    onClick={clickHandler} // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! отсюда можно запустить callback
                 >
-                    {menu.name}
+                    {item.name}
                 </span>
                 {
-                    menu.subMenus && menu.subMenus.length > 0 &&
+                    item.children && item.children.length > 0 &&
                     <div className="submenus">
                         {
-                            menu.subMenus.map((menu) => {
+                            item.children.map((item) => {
                                 return (
                                     <Menu 
-                                        key={menu._id}
-                                        menu={menu}
+                                        key={item._id}
+                                        item={item}
                                         selectedItem={selectedItem}
-                                        onClick={onClick}
+                                        onClick={onClick} // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! отсюда нельзя запускать callback, это просто передача параметров
                                     />
                                 )
                             })

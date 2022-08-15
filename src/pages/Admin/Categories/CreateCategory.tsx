@@ -1,17 +1,22 @@
-import { ChangeEvent, FormEvent, useState, useCallback, memo } from "react";
+import { ChangeEvent, FormEvent, useState, useCallback, memo, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import Button from "../../../components/UI/Button/Button";
 import Input from "../../../components/UI/Input/Input";
 import TextArea from "../../../components/UI/TextArea/TextArea";
 import CheckboxRadio from "../../../components/UI/Checkbox-Radio/CheckboxRadio";
-import UploadImages from '../../../components/UI/UploadImages/UploadImages';
+import UploadImages from '../../../components/UploadImages/UploadImages';
+import MultiSelect from "../../../components/UI/MultiSelect/MultiSelect";
+import BrandsModal from "./brandsModal";
 import CategoryProperty from './CategoryProperty';
 import {PropertyType, IUIProperty, CategoryStatusType, INewCategory } from "../../../types/CategoryTypes";
 import { AxiosError } from 'axios';
 import { notificationActions } from '../../../store/reducers/notifications';
-import { useDispatch } from 'react-redux';
 import CategoryServices from '../../../services/CategoryServices';
 import {v4} from 'uuid';
+import { getBrands } from '../../../store/reducers/brands/brandsActionCreators';
+import { RootState } from "../../../store/store";
+import { DBBrand } from "../../../types/Brand";
 
 function CreateCategory() {
     const dispatch =  useDispatch();
@@ -22,6 +27,16 @@ function CreateCategory() {
     const [categoryStatus, setCategoryStatus] = useState<CategoryStatusType>(location.state ? 'branch' : 'root'); // в location.state находится _id родительской категории
     const [properties, setProperties] = useState<IUIProperty[]>([]);
     const [imageFiles, setImageFiles] = useState<FileList | undefined>();
+    const [categoryBrands, setCategoryBrands] = useState<Array<DBBrand>>([]);
+    const {brands} = useSelector((state: RootState) => state.brands);
+    const [isShowBrandsModal, setIsShowBrandsModal] = useState(false);
+
+    useEffect(
+        function() {
+            dispatch(getBrands());
+        },
+        [dispatch]
+    );
     
     const categoryNameHandler = useCallback(
         function(e: ChangeEvent<HTMLInputElement>) {
@@ -93,6 +108,22 @@ function CreateCategory() {
         },
         []
     );
+
+
+    const showBrandsModal = useCallback(
+        function() {
+            setIsShowBrandsModal(true);
+        },
+        []
+    );
+
+
+    const hideBrandsModal = useCallback(
+        function() {
+            setIsShowBrandsModal(false);
+        },
+        []
+    );
    
 
     const selectImage = useCallback(
@@ -105,6 +136,30 @@ function CreateCategory() {
     const removeImage = useCallback(
         function removeImage(newFileList: FileList) {
             setImageFiles(newFileList);
+        },
+        []
+    );
+
+
+    const selectBrandHandler = useCallback(
+        function(brand: DBBrand) {
+            const prev = [...categoryBrands];
+            const duplicateIdx = prev.findIndex((item) => item._id === brand._id);
+            if ( duplicateIdx > -1 ) {
+                prev.splice(duplicateIdx, 1);
+            }
+            else {
+                prev.push(brand);
+            }
+            setCategoryBrands(prev);
+        },
+        [categoryBrands]
+    );
+
+
+    const clearSelectedBrands = useCallback(
+        function() {
+            setCategoryBrands([]);
         },
         []
     );
@@ -212,6 +267,10 @@ function CreateCategory() {
                 description: description.value,
                 status: categoryStatus,
             }
+
+            if (categoryStatus === 'leaf') {
+                category.brands = categoryBrands.map((brand) => brand._id);
+            }
     
             const formData = new FormData();
             formData.append('category', JSON.stringify(category));
@@ -222,7 +281,7 @@ function CreateCategory() {
     
             return formData;
         },
-        [location.state, categoryName.value, description.value, imageFiles, properties, categoryStatus]
+        [location.state, categoryName.value, description.value, imageFiles, properties, categoryStatus, categoryBrands]
     );
     
 
@@ -292,34 +351,60 @@ function CreateCategory() {
                     onChange={selectImage}
                     onRemove={removeImage}
                 />
-
+                
                 {
                     categoryStatus === 'leaf' ? 
-                    <div className="create-properties mb-2">
-                        <div className='d-flex mb-2'>
-                            <Button className="btn-sm btn-secondary me-2" onClick={addPropertyBtn}>Add property</Button>
+                    <>
+                        <div className="brands-box mb-2">
+                            <MultiSelect 
+                                idKey="_id"
+                                labelKey="name"
+                                title='Brands'
+                                options={brands}
+                                selectedOptions={categoryBrands}
+                                onSelect={selectBrandHandler}
+                                onUnselect={selectBrandHandler}
+                                onClear={clearSelectedBrands}
+                            />
+                            <Button 
+                                className="brands-btn btn-sm btn-secondary"
+                                onClick={showBrandsModal}
+                            >Brands</Button>
                         </div>
-                        <div>
-                            {
-                                properties.map((prop, index) => {
-                                    return (
-                                        <CategoryProperty 
-                                            key={prop.key}
-                                            // property={JSON.stringify(prop)} 
-                                            property={prop} 
-                                            propIndex={index}
-                                            onChangeProperty={onChangeProperty}
-                                            onDeleteProperty={onDeleteProperty}
-                                        />
-                                    )
-                                })
-                            }
+
+                        <div className="create-properties mb-2">
+                            <div className='d-flex mb-2'>
+                                <Button className="btn-sm btn-secondary me-2" onClick={addPropertyBtn}>Add property</Button>
+                            </div>
+                            <div>
+                                {
+                                    properties.map((prop, index) => {
+                                        return (
+                                            <CategoryProperty 
+                                                key={prop.key}
+                                                property={prop} 
+                                                propIndex={index}
+                                                onChangeProperty={onChangeProperty}
+                                                onDeleteProperty={onDeleteProperty}
+                                            />
+                                        )
+                                    })
+                                }
+                            </div>
                         </div>
-                    </div> : 
+                    </>
+                    : 
                     ''
                 }
                 <Button type="submit" className="btn-sm btn-success">Submit</Button>
-            </form>            
+            </form>           
+
+            {
+                isShowBrandsModal ? 
+                <BrandsModal
+                    onBackdropClick={hideBrandsModal}
+                /> : ''
+            } 
         </div>
     )
 }

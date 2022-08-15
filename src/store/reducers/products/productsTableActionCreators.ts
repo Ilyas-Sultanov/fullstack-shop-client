@@ -145,7 +145,7 @@ export function getCategory(_id: string) {
             }
         }
         finally {
-            dispatch(editProductActions.setProductIsLoading(false));
+            dispatch(createProductActions.setCreateProductIsLoading(false));
         }
     }
 }

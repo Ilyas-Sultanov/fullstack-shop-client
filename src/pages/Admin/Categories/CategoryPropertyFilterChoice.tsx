@@ -1,9 +1,9 @@
-import {Fragment, useCallback} from 'react';
+import {ChangeEvent, Fragment, useCallback} from 'react';
 import Button from "../../../components/UI/Button/Button";
 import Input from "../../../components/UI/Input/Input";
 import Card from "../../../components/UI/Card/Card";
 import {IUIFilterChoice, PropertyInputSettingsType} from '../../../types/CategoryTypes';
-import useWhyDidYouUpdate from '../../../hooks/useWhyDidYouUpdate';
+// import useWhyDidYouUpdate from '../../../hooks/useWhyDidYouUpdate';
 
 type FilterChoiceProps = {
     choice: IUIFilterChoice
@@ -16,7 +16,7 @@ type FilterChoiceProps = {
 
 function CategoryPropertyFilterChoice({choice, choiceIndex, propInputSettings, onChangeChoice, onDeleteChoice}: FilterChoiceProps) {
 
-    useWhyDidYouUpdate('CategoryPropertyFilterChoice', {choice, choiceIndex, propInputSettings, onChangeChoice, onDeleteChoice});
+    // useWhyDidYouUpdate('CategoryPropertyFilterChoice', {choice, choiceIndex, propInputSettings, onChangeChoice, onDeleteChoice});
 
     // const memoizedChoice: IUIFilterChoice = useMemo(() => {
     //     return JSON.parse(choice);
@@ -56,9 +56,28 @@ function CategoryPropertyFilterChoice({choice, choiceIndex, propInputSettings, o
         [choice, choiceIndex, onChangeChoice]
     );
     
+    const choiceRangeValueHandler = useCallback(
+        function(inputName: 'From' | 'To', value: string) {
+            console.log(value);
+            
+            const ch = {...choice};
+            if (inputName === 'From') {
+                if (!ch.value) ch.value = [+value, null];
+                else (ch.value as [number | null, number | null])[0] = value !== '' ? +value : null;
+            }
+            else if (inputName === 'To') {
+                if (!ch.value) ch.value = [null, +value];
+                else (ch.value as [number | null, number | null])[1] = value !== '' ? +value : null;
+            }
+            onChangeChoice(ch, choiceIndex);
+        },
+        [choice, choiceIndex, onChangeChoice]
+    );
 
     const choiceValueHandler = useCallback(
-        function(inputName: 'From' | 'To' | 'Equal', value: string) {
+        function(e: ChangeEvent<HTMLInputElement>) {
+            const inputType = e.target.type;
+            const value = inputType === 'number' ? Number(e.target.value) : e.target.value;
             const ch = {...choice};
 
             if (ch.validationObj.value) {
@@ -68,16 +87,7 @@ function CategoryPropertyFilterChoice({choice, choiceIndex, propInputSettings, o
             if (!propInputSettings.isRange) {
                 ch.value = value;
             }
-            else {
-                if (inputName === 'From') {
-                    if (!ch.value) ch.value = [+value, null];
-                    else (ch.value as [number | null, number | null])[0] = value !== '' ? +value : null;
-                }
-                else if (inputName === 'To') {
-                    if (!ch.value) ch.value = [null, +value];
-                    else (ch.value as [number | null, number | null])[1] = value !== '' ? +value : null;
-                }
-            }
+
             onChangeChoice(ch, choiceIndex);
         },
         [choice, choiceIndex, propInputSettings.isRange, onChangeChoice]
@@ -93,7 +103,7 @@ function CategoryPropertyFilterChoice({choice, choiceIndex, propInputSettings, o
                 (ch.value as [number, number])[1] !== 0 &&
                 (!(ch.value as [number, number])[0] && !(ch.value as [number, number])[1])
             ) {
-                ch.validationObj.value = ['At least one of these fields must be filled'];
+                // ch.validationObj.value = ['At least one of these fields must be filled'];
             }
             else if (!ch.value) {
                 ch.validationObj.value = ['Required'];
@@ -170,7 +180,7 @@ function CategoryPropertyFilterChoice({choice, choiceIndex, propInputSettings, o
                             name="From" 
                             label='Form' 
                             value={((choice.value as [number | null, number | null]) && (choice.value as [number | null, number | null])[0]) ? (choice.value as [number | null, number | null])[0]?.toString() : ''} 
-                            onChange={(e) => choiceValueHandler('From', e.target.value.trim())} 
+                            onChange={(e) => choiceRangeValueHandler('From', e.target.value.trim())} 
                             onBlur={validateValue}
                             messages={choice.validationObj.value}
                         />
@@ -181,7 +191,7 @@ function CategoryPropertyFilterChoice({choice, choiceIndex, propInputSettings, o
                             name="To" 
                             label='To' 
                             value={((choice.value as [number | null, number | null]) && (choice.value as [number | null, number | null])[1]) ? (choice.value as [number | null, number | null])[1]?.toString() : ''} 
-                            onChange={(e) => choiceValueHandler('To', e.target.value.trim())} 
+                            onChange={(e) => choiceRangeValueHandler('To', e.target.value.trim())} 
                             onBlur={validateValue}
                             messages={choice.validationObj.value}
                         />
@@ -193,7 +203,8 @@ function CategoryPropertyFilterChoice({choice, choiceIndex, propInputSettings, o
                         name="Equal" 
                         label='Value' 
                         value={choice.value ? choice.value.toString() : ''} 
-                        onChange={(e) => choiceValueHandler('Equal', e.target.value.trim())} 
+                        // onChange={(e) => choiceValueHandler('Equal', e.target.value.trim())} 
+                        onChange={choiceValueHandler} 
                         onBlur={validateValue}
                         messages={choice.validationObj.value}
                     />

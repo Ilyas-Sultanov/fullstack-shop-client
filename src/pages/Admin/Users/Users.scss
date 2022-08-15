@@ -4,6 +4,10 @@
     }
 
     .users-table {
+        & {
+            height: 1px;  // Внимание! Это нужно чтобы td {height: 100%} работало. (Why 1px? No idea.)
+        }
+
         .input-group > :not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
             margin-left: 0;
             border-top-left-radius: 0.2rem; 
@@ -11,6 +15,7 @@
         }
 
         .action-buttons {
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -21,10 +26,10 @@
             word-wrap: normal;
         }
 
-        .filter-btn {
-            display: flex;
-            justify-content: center;
-        }
+        // .filter-btn {
+        //     display: flex;
+        //     justify-content: center;
+        // }
     }
 
     .chevronIcon--descending {

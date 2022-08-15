@@ -78,7 +78,7 @@ function AuthModal() {
             <Card>
                 {
                     isLoading ? <Spinner/> :
-                    < Tabs tabs={ [
+                    <Tabs tabs={ [
                         {name: 'Login', el: <LoginForm onLogin={onLogin} onCancel={hideAuthModal}/>},
                         {name: 'Register', el: <RegistrationForm onReg={onReg} onCancel={hideAuthModal}/>},
                         {name: 'Forgot Password?', el: <ForgotPassForm onForgotPassword={onForgotPassword} onCancel={hideAuthModal}/>},

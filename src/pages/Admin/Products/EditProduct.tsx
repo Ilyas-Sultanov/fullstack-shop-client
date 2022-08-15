@@ -2,23 +2,22 @@ import './CreateProduct.scss';
 import {useEffect, ChangeEvent, FormEvent, useCallback} from 'react';
 import {useParams} from 'react-router-dom';
 import {useSelector, useDispatch} from 'react-redux';
-import { IEditedProductObj } from '../../../types/Products';
+import { IEditedProductObj} from '../../../types/Products';
 import {RootState} from '../../../store/store';
 import {editProductActions} from '../../../store/reducers/products/editProduct';
 import {getOneProduct, editProduct} from '../../../store/reducers/products/productsTableActionCreators';
 import {getCategory} from '../../../store/reducers/products/productsTableActionCreators';
-import { createBrand, getBrands, editBrand, deleteBrand } from '../../../store/reducers/brands/brandsActionCreators';
+import { getBrands } from '../../../store/reducers/brands/brandsActionCreators';
 import CategoriesListModal from "../Categories/CategoriesListModal";
-import BrandsModal from './brandsModal';
 import Button from '../../../components/UI/Button/Button';
 import Input from '../../../components/UI/Input/Input';
 import TextArea from '../../../components/UI/TextArea/TextArea';
 import Card from '../../../components/UI/Card/Card';
-import CheckboxRadio from '../../../components/UI/Checkbox-Radio/CheckboxRadio';
-import UploadImages from '../../../components/UI/UploadImages/UploadImages';
+import UploadImages from '../../../components/UploadImages/UploadImages';
 import SelectWithSearch, {ISelectOption} from '../../../components/UI/SelectWithSearch/SelectWithSearch';
-import { IUICategory } from '../../../types/CategoryTypes';
+import { IUICategory, FilterChoiceValue } from '../../../types/CategoryTypes';
 import Spinner from '../../../components/UI/Spninner/Spinner';
+import ProductProperty from './ProductProperty';
 
 function EditProduct() {
     const dispatch = useDispatch();
@@ -29,11 +28,8 @@ function EditProduct() {
         isValid,
         imageFiles,
         isShowCategoryListModal,
-        isShowBrandsModal,
         // isEdited,
     } = useSelector((state: RootState) => state.editProduct);
-
-    const {brands, brandsIsLoading} = useSelector((state: RootState) => state.brands);
 
     
     useEffect(() => {
@@ -77,7 +73,7 @@ function EditProduct() {
     const selectCategory = useCallback(
         function(category: IUICategory) {
             dispatch(editProductActions.setIsShowCategoryListModal(false));
-            dispatch(getCategory(category._id)); // внимание! диспатчим не сервис, а action creator
+            dispatch(getCategory(category._id));
         },
         [dispatch]
     );
@@ -98,51 +94,6 @@ function EditProduct() {
         [dispatch]
     );
    
-
-    const showBrandsModal = useCallback(
-        function() {
-            dispatch(editProductActions.setIsShowBrandsModal(true));
-        },
-        [dispatch]
-    );
-  
-
-    const hideBrandsModal = useCallback(
-        function() {
-            dispatch(editProductActions.setIsShowBrandsModal(false));
-        },
-        [dispatch]
-    );
-
-
-    const createBrandHandler = useCallback(
-        function(name: string) {
-            dispatch(createBrand(name));
-        },
-        [dispatch]
-    );
-
-
-    const editBrandHandler = useCallback(
-        function(name: string, brandId: string) {
-            const targetBrand = brands.find((brand) => {
-                return brand._id === brandId;
-            });
-            if (targetBrand) {
-                dispatch(editBrand(targetBrand._id, name));
-            }
-        },
-        [dispatch, brands]
-    );
-
-
-    const deleteBrandHandler = useCallback(
-        function(brandId: string) {
-            dispatch(deleteBrand(brandId));
-        },
-        [dispatch] 
-    );
-
    
     const selectBrand = useCallback(
         function(selectOption?: ISelectOption) {
@@ -183,41 +134,21 @@ function EditProduct() {
     );
   
 
-    const stringPropHandler = useCallback(
-        function(e: ChangeEvent<HTMLInputElement>, categoryPropId: string) {
-            const value = e.target.value;
-            dispatch(editProductActions.setPropValue({categoryPropId, value}));
-        },
-        [dispatch]
-    );
-
-    const numericPropHandler = useCallback(
-        function(e: ChangeEvent<HTMLInputElement>, categoryPropId: string) {
-            const value = Number(e.target.value);
+    const changePropHandler = useCallback(
+        function(categoryPropId: string, value: FilterChoiceValue) {
             dispatch(editProductActions.setPropValue({categoryPropId, value}));
         },
         [dispatch]
     );
    
 
-    const booleanPropHandler = useCallback(
-        function(e: ChangeEvent<HTMLInputElement>, categoryPropId: string) {
-            const value = e.target.value === 'true' ? true : false;
-            dispatch(editProductActions.setPropValue({categoryPropId, value}));
-        },
-        [dispatch]
-    );
-    
-
-    const multiselectPropHandler = useCallback(
-        function(e: ChangeEvent<HTMLInputElement>, categoryPropId: string) {
-            const value = e.target.value;
+    const changeMultiselectPropHandler = useCallback(
+        function(categoryPropId: string, value: FilterChoiceValue) {
             dispatch(editProductActions.setMultiselectPropValue({categoryPropId, value}));
         },
         [dispatch]
     );
     
-
     
     function submitHandler(e: FormEvent) {
         e.preventDefault();
@@ -229,8 +160,17 @@ function EditProduct() {
         if (isValid) {
             const props = product.properties.map((prop) => {
                 return {
+                    // categoryPropId: prop.categoryPropId,
+                    // value: prop.value
+
                     categoryPropId: prop.categoryPropId,
-                    value: prop.value
+                    value: prop.value,
+                    name: prop.name,
+                    filterable: prop.filterable,
+                    filterChoices: prop.filterChoices,
+                    unit: prop.unit,
+                    inputSettings: prop.inputSettings,
+                    validationMessages: prop.validationMessages,
                 }
             });
     
@@ -273,6 +213,7 @@ function EditProduct() {
         }
     }, [dispatch]);
 
+
     return (
         <div className="create-product">
             {
@@ -314,22 +255,15 @@ function EditProduct() {
                     />
 
                     <div className='mb-2 d-flex align-items-end'>
-                        {
-                            brandsIsLoading ? <Spinner/> :
-                            <>
-                                <SelectWithSearch 
-                                    idKey='_id'
-                                    labelKey='name'
-                                    title='Select brand'
-                                    placeholder=''
-                                    onChange={selectBrand}
-                                    options={brands}
-                                    selectedOption={product.brand} // value
-                                />
-                                <Button className='btn-sm btn-secondary ms-2' onClick={showBrandsModal}>Brands</Button>
-                            </>
-                        }
-                        
+                        <SelectWithSearch 
+                            idKey='_id'
+                            labelKey='name'
+                            title='Select brand'
+                            placeholder=''
+                            onChange={selectBrand}
+                            options={product.category.brands}
+                            selectedOption={product.brand} // value
+                        />                        
                     </div>
 
                     <Input 
@@ -365,131 +299,19 @@ function EditProduct() {
                         onChange={quantityHandler}
                     />    
 
-                    {
-                        product.properties && product.properties.length > 0 ?
-                        product.properties.map((prop, index) => {
-                            return (
-                                <div key={index}>
-                                    {
-                                        prop.type === 'String' && prop.filterable ?  // если пропс фильтруемый
-                                        <Card className='mb-2'>
-                                            <div>{prop.name}</div>
-                                            {
-                                                prop.filterChoices && prop.filterChoices.length > 0 ?
-                                                prop.filterChoices.map((choice, index) => {
-                                                    return (
-                                                        <CheckboxRadio 
-                                                            key={index} 
-                                                            type={prop.isMultiselect ? 'checkbox' : 'radio'} // если prop.isMultiselect, то у продукта - массив значений, поэтому checkbox а не radio
-                                                            name={prop.isMultiselect ? '' : prop.name} 
-                                                            label={choice.name} 
-                                                            value={choice.value.toString()}
-                                                            checked={
-                                                                prop.isMultiselect ? 
-                                                                (prop.value as string[]).includes(choice.value as string) : 
-                                                                choice.value === prop.value
-                                                            }
-                                                            onChange={(e) => {
-                                                                if (prop.isMultiselect) multiselectPropHandler(e, prop.categoryPropId)
-                                                                else stringPropHandler(e, prop.categoryPropId)
-                                                            }}
-                                                        />
-                                                    )
-                                                }) : null
-                                            }
-                                            <div className='invalid-feedback d-block'>
-                                                {
-                                                    prop.validationMessages.length > 0 ?
-                                                    prop.validationMessages.map((msg, index) => {
-                                                        return (
-                                                            <div key={index}>{msg}</div>
-                                                        )
-                                                    }): null
-                                                }
-                                            </div>
-                                        </Card> :
-                                        prop.type === 'Number' && prop.filterable ? 
-                                        <div className='mb-2'>
-                                            <div>{prop.name}</div>
-                                            {
-                                                prop.filterChoices && prop.filterChoices.length > 0 ?
-                                                <Input 
-                                                    type='number' 
-                                                    step={0.0000001}
-                                                    name='' 
-                                                    value={prop.value.toString()} 
-                                                    onChange={(e) => numericPropHandler(e, prop.categoryPropId)}
-                                                /> :
-                                                prop.filterChoices ? prop.filterChoices.map((choice, index) => {
-                                                    return (
-                                                        <CheckboxRadio 
-                                                            key={index} 
-                                                            type='radio' 
-                                                            name={prop.name} 
-                                                            label={choice.name} 
-                                                            value={choice.value.toString()} 
-                                                            checked={choice.value === prop.value}
-                                                            onChange={(e) => numericPropHandler(e, prop.categoryPropId)}
-                                                        />
-                                                    )
-                                                }) : null
-                                            }
-                                            <div className='invalid-feedback d-block'>
-                                                {
-                                                    prop.validationMessages.length > 0 ?
-                                                    prop.validationMessages.map((msg) => {
-                                                        return (
-                                                            <div key={index}>{msg}</div>
-                                                        )
-                                                    }): null
-                                                }
-                                            </div>
-                                        </div> :
-                                        prop.type === 'Boolean' ? // boolean не фильтруемый всегда
-                                        <Card className='mb-2'>
-                                            <div>{prop.name}</div>
-                                            <div>
-                                                <CheckboxRadio 
-                                                    type='radio' 
-                                                    name={prop.name} 
-                                                    label='Yes'
-                                                    value='true'
-                                                    checked={prop.value === true}
-                                                    onChange={(e) => {booleanPropHandler(e, prop.categoryPropId)}}
-                                                />
-                                                <CheckboxRadio 
-                                                    type='radio' 
-                                                    name={prop.name} 
-                                                    label='No' 
-                                                    value='false'
-                                                    checked={prop.value === false || prop.value === ''}
-                                                    onChange={(e) => booleanPropHandler(e, prop.categoryPropId)}
-                                                />
-                                            </div>
-                                        </Card> :
-                                        // если пропс не фильтруемый
-                                        prop.type === 'Number' ? 
-                                        <Input 
-                                            type='number' 
-                                            name='' 
-                                            value={`${prop.value}`}
-                                            label={prop.name} 
-                                            className='mb-2' 
-                                            onChange={(e) => numericPropHandler(e, prop.categoryPropId)}
-                                        /> :
-                                        <Input 
-                                            type='text' 
-                                            name='' 
-                                            value={`${prop.value}`}
-                                            label={prop.name} 
-                                            className='mb-2' 
-                                            onChange={(e) => stringPropHandler(e, prop.categoryPropId)}
-                                        />
-                                    }
-                                </div>
-                            )
-                        }) : null
-                    }
+{
+                    product.properties && product.properties.length > 0 ?
+                    product.properties.map((prop, index) => {
+                        return (
+                            <ProductProperty
+                                key={index}
+                                property={prop}
+                                onChangeProp={changePropHandler}
+                                onChangeMultiselectProp={changeMultiselectPropHandler}
+                            />
+                        )
+                    }) : null
+                }
                     
                     <Button 
                         type='submit' 
@@ -511,18 +333,6 @@ function EditProduct() {
                     checkedCategoryId={product.category._id}
                 />
             }     
-
-            {
-                isShowBrandsModal && 
-                <BrandsModal 
-                    isLoading={brandsIsLoading}
-                    brands={brands}
-                    onCreateBrand={createBrandHandler}
-                    onEditBrand={editBrandHandler}
-                    onDeleteBrand={deleteBrandHandler}
-                    onBackdropClick={hideBrandsModal}
-                /> 
-            } 
         </div>
     )
 }

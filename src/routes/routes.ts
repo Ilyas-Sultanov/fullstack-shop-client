@@ -5,6 +5,7 @@ const ResetPassword = lazy(() => import("../pages/ResetPassword/ResetPassword"))
 const Admin = lazy(() => import("../pages/Admin/Admin"));
 const Contacts = lazy(() => import("../pages/Contacts/Contacts"));
 const Products = lazy(() => import("../pages/Products/Products"));
+const Product = lazy(() => import("../pages/Product/Product"));
 const Error = lazy(() => import("../pages/Error/Error"));
 
 const publicRoutes = [
@@ -13,6 +14,7 @@ const publicRoutes = [
     { path: 'about', element: About },
     { path: 'contacts', element: Contacts },
     { path: 'products', element: Products }, // звездочка нужна для того чтобы отличать вложенные роуты от родительского, если есть вложенные роуты, то * обязательна
+    { path: 'product/:_id', element: Product },
     { path: 'error', element: Error },
 ];
 

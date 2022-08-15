@@ -10,7 +10,7 @@ export function getManyProducts(searchParams?: URLSearchParams) {
             dispatch(productsActions.setProductsIsLoading(true));
             const response = await ProductsService.getManyProducts(searchParams);
             const products = response.data;
-            dispatch(productsActions.getManySuccess(products));
+            dispatch(productsActions.setProducts(products));
         }
         catch (err) {
             const e = err as AxiosError;
@@ -23,11 +23,11 @@ export function getManyProducts(searchParams?: URLSearchParams) {
 }
 
 
-export function getHighestPrice() {
+export function getHighestPrice(categoryId?: string) {
     return async function(dispatch: AppDispatch) {
         try {
             dispatch(productsActions.setProductsIsLoading(true));
-            const response = await ProductsService.getHighestPrice();
+            const response = await ProductsService.getHighestPrice(categoryId);
             const highestPrice = response.data;
             dispatch(productsActions.setHighestPrice(highestPrice));
         }

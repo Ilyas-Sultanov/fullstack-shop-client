@@ -1,0 +1,12 @@
+.product-counter {
+    & {
+        display: flex;
+        column-gap: 10px;
+    }
+
+    .product-counter__number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}

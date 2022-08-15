@@ -8,7 +8,7 @@ import { IUIProperty, IUIFilterChoice } from '../../../types/CategoryTypes';
 import CategoryPropertyFilterChoice from './CategoryPropertyFilterChoice';
 import {v4} from 'uuid';
 import { Fragment } from "react";
-import useWhyDidYouUpdate from '../../../hooks/useWhyDidYouUpdate';
+// import useWhyDidYouUpdate from '../../../hooks/useWhyDidYouUpdate';
 
 type CategoryPropertyProps = {
     property: IUIProperty
@@ -21,9 +21,8 @@ type CategoryPropertyProps = {
 
 function CategoryProperty({property, propIndex, onChangeProperty, onDeleteProperty}: CategoryPropertyProps) {
     const [show, setShow] = useState(false);
-    const [isRange, setIsRange] = useState(false);
 
-    useWhyDidYouUpdate('CategoryProperty', {property, propIndex, onChangeProperty, onDeleteProperty, show, isRange});
+    // useWhyDidYouUpdate('CategoryProperty', {property, propIndex, onChangeProperty, onDeleteProperty, show});
 
     // const memoizedProperty: IUIProperty = useMemo(() => {
     //     return JSON.parse(memoizedProperty);
@@ -104,6 +103,12 @@ function CategoryProperty({property, propIndex, onChangeProperty, onDeleteProper
             if (prop.filterable && prop.inputSettings.inputType !== 'Boolean' && prop.filterChoices!.length < 1) { // validation
                 prop.validationObj.filterable = ['For a filterable property, you must specify at least one filter option'];
             }
+            if (prop.filterable && prop.inputSettings.inputType === 'Boolean' && (!prop.filterChoices || prop.filterChoices.length !== 2)) {
+                prop.filterChoices = [
+                    {name: 'Да', value: true, validationObj: {}, key: v4()},
+                    {name: 'Нет', value: false, validationObj: {}, key: v4()}
+                ]
+            }
             onChangeProperty(prop, propIndex);
         },
         [property, propIndex, onChangeProperty]
@@ -117,17 +122,18 @@ function CategoryProperty({property, propIndex, onChangeProperty, onDeleteProper
             const emptyChoice: IUIFilterChoice = {
                 key: v4(),
                 name: '',
-                value: isRange ? [null, null] : '',
+                value: property.inputSettings.isRange ? [null, null] : '',
                 validationObj: {
                     name: ['Required'],
-                    value: isRange ? ['At least one of these fields must be filled'] : ['Required'],
+                    // value: isRange ? ['At least one of these fields must be filled'] : ['Required'],
                 }
             }
+            
             prop.filterChoices.unshift(emptyChoice);
             delete prop.validationObj.filterable;
             onChangeProperty(prop, propIndex);
         },
-        [property, isRange, propIndex, onChangeProperty]
+        [property, /*isRange,*/ propIndex, onChangeProperty]
     );
     
 
@@ -141,6 +147,12 @@ function CategoryProperty({property, propIndex, onChangeProperty, onDeleteProper
             }
             if (prop.inputSettings.inputType === 'Number' && !prop.unit) { // validation
                 prop.validationObj.unit = ['For an input of type Number, you need to specify the unit of measurement'];
+            }
+            if (prop.inputSettings.inputType === 'Boolean' && prop.filterable) {
+                prop.filterChoices = [
+                    {name: 'Да', value: true, validationObj: {}, key: v4()},
+                    {name: 'Нет', value: false, validationObj: {}, key: v4()}
+                ]
             }
             onChangeProperty(prop, propIndex);
         },
@@ -156,21 +168,24 @@ function CategoryProperty({property, propIndex, onChangeProperty, onDeleteProper
             if (detail === 'Multiselect') {
                 prop.inputSettings.isMultiselect = !prop.inputSettings.isMultiselect;
                 prop.inputSettings.isRange = false;
-                if (isRange) setIsRange(false);
+                // if (property.inputSettings.isRange) setIsRange(false);
+                if (property.inputSettings.isRange) prop.inputSettings.isRange = false;
             }
             else if (detail === 'OneSelect') {
                 prop.inputSettings.isMultiselect = false;
                 prop.inputSettings.isRange = false;
-                if (isRange)  setIsRange(false);
+                // if (property.inputSettings.isRange)  setIsRange(false);
+                if (property.inputSettings.isRange) prop.inputSettings.isRange = false;
             }
             else {
                 prop.inputSettings.isRange = !prop.inputSettings.isRange;
                 prop.inputSettings.isMultiselect = false;
-                setIsRange(true);
+                // setIsRange(true);
+                if (!property.inputSettings.isRange) prop.inputSettings.isRange = true;
             }
             onChangeProperty(prop, propIndex);
         },
-        [property, isRange, propIndex, onChangeProperty]
+        [property, /*isRange,*/ propIndex, onChangeProperty]
     );
     
 

@@ -10,8 +10,9 @@ import productsReduser from './reducers/products/products'; // публичны�
 import createProductReducer from './reducers/products/createProduct';
 import editProductReducer from './reducers/products/editProduct';
 import brandsReducer from './reducers/brands/brands';
-import catalogReducer from "./reducers/catalog/catalog";
-import categoriesMenuReducer from './reducers/categoriesMenu/categoriesMenu'; 
+import categoriesMenuReducer from "./reducers/categoriesMenu/categoriesMenu";
+import shoppingCartReducer from './reducers/shoppingCart/shoppingCart';
+import productReducer from './reducers/product/product';
 
 const store = configureStore({
     reducer: {
@@ -26,8 +27,9 @@ const store = configureStore({
         createProduct: createProductReducer,
         editProduct: editProductReducer,
         brands: brandsReducer,
-        catalog: catalogReducer,
         categoriesMenu: categoriesMenuReducer,
+        shoppingCart: shoppingCartReducer,
+        product: productReducer,
     },
     middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

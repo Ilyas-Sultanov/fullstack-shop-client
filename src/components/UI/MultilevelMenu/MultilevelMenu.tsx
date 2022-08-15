@@ -1,32 +1,39 @@
 import './MultilevelMenu.scss';
-import { memo } from "react";
-import Menu from './Menu';
+import { memo, useCallback } from "react";
+import Menu, {IMultilevelMenu} from './Menu';
+// import useWhyDidYouUpdate from '../../../hooks/useWhyDidYouUpdate';
 
-export interface IMultilevelMenu {
-    name: string
-    _id?: string
-    subMenus: Array<IMultilevelMenu>
-    children?: never
-}
-
-type MultilevelMenuItemProps = {
+type MultilevelMenuProps<T> = {
     title?: string
-    items: Array<IMultilevelMenu>
-    selectedItem?: IMultilevelMenu
-    onClick: (selectedItem: IMultilevelMenu) => void
+    items: Array<IMultilevelMenu<T>>
+    selectedItem?: IMultilevelMenu<T>
+    onClick: (item: IMultilevelMenu<T>) => void
     children?: never
 }
 
-function MultilevelMenu({title, items, selectedItem, onClick}: MultilevelMenuItemProps) {
+function MultilevelMenu<T extends IMultilevelMenu<T>>({title, items, selectedItem, onClick}: MultilevelMenuProps<T>) {
+
+    // useWhyDidYouUpdate('MultilevelMenu', {title, items, selectedItem, onClick});
+
+    const clickHandler = useCallback(
+        function(item: IMultilevelMenu<T>) {
+            onClick(item)
+        },
+        [onClick]
+    );
+
     return (
         <div className='multilevel-menu'>
+            {
+                title ? <div>{title}</div> : ''
+            }
             {
                 items.length > 0 && items.map((menu) => {
                     return (
                         <Menu
                             key={menu._id}
-                            menu={menu}        
-                            onClick={onClick}
+                            item={menu}        
+                            onClick={clickHandler}
                             selectedItem={selectedItem}  
                         />
                     )

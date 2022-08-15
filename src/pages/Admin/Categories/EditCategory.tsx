@@ -1,22 +1,27 @@
-import React, {useEffect, useState, ChangeEvent, FormEvent, useCallback} from 'react';
+import React, {useEffect, useState, ChangeEvent, FormEvent, useCallback, useMemo} from 'react';
 import {useParams} from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import CategoryServices from '../../../services/CategoryServices';
 import {v4} from 'uuid';
 import { AxiosError } from 'axios';
 import { notificationActions } from '../../../store/reducers/notifications';
+import { getBrands } from '../../../store/reducers/brands/brandsActionCreators';
 import { IUICategory, IEditedCategory, IUIProperty, PropertyType, CategoryStatusType, IUIFilterChoice } from "../../../types/CategoryTypes";
 import Spinner from '../../../components/UI/Spninner/Spinner';
 import CheckboxRadio from '../../../components/UI/Checkbox-Radio/CheckboxRadio';
 import Input from '../../../components/UI/Input/Input';
 import TextArea from '../../../components/UI/TextArea/TextArea';
 import Button from '../../../components/UI/Button/Button';
+import MultiSelect from '../../../components/UI/MultiSelect/MultiSelect';
 import CategoryProperty from './CategoryProperty';
 import CategoriesListModal from './CategoriesListModal';
 import Card from '../../../components/UI/Card/Card';
-import UploadImages from '../../../components/UI/UploadImages/UploadImages';
+import UploadImages from '../../../components/UploadImages/UploadImages';
+import BrandsModal from './brandsModal';
 import {urlToFile} from '../../../helpers/urlToFile';
-// import useWhyDidYouUpdate from '../../../hooks/useWhyDidYouUpdate';
+import { RootState } from '../../../store/store';
+import { DBBrand } from '../../../types/Brand';
+import useWhyDidYouUpdate from '../../../hooks/useWhyDidYouUpdate';
 
 function EditCategory() {
     const params = useParams();
@@ -25,7 +30,8 @@ function EditCategory() {
     const [statusMessage, setStatusMessage] = useState('');
     const [parentMessage, setParentMessage] = useState('');
     const [properties, setProperties] = useState<IUIProperty[]>([]);
-    const [isShowModal, setIsShowModal] = useState(false);   
+    const [isShowCategoriesListModal, setIsShowCategoriesListModal] = useState(false);   
+    const [isShowBrandsModal, setIsShowBrandsModal] = useState(false);
 
     const [categoryId, setCategoryId] = useState('');
     const [parent, setParent] = useState({_id: '', name: ''});
@@ -34,28 +40,37 @@ function EditCategory() {
     const [originalStatus, setOriginalStatus] = useState<CategoryStatusType>();
     const [status, setStatus] = useState<CategoryStatusType>();
     const [imageFiles, setImageFiles] = useState<FileList | undefined>();
+    const [categoryBrands, setCategoryBrands] = useState<Array<DBBrand>>([]);
+    const {brands} = useSelector((state: RootState) => state.brands);
 
-    // useWhyDidYouUpdate('EditCategory', {
-    //     params,
-    //     isLoading,
-    //     statusMessage,
-    //     parentMessage,
-    //     properties,
-    //     isShowModal,
-    //     categoryId,
-    //     parent,
-    //     categoryName,
-    //     description,
-    //     originalStatus,
-    //     status,
-    //     imageFiles
-    // });
+    useWhyDidYouUpdate('EditCategory', {
+        params,
+        isLoading,
+        statusMessage,
+        parentMessage,
+        properties,
+        categoryId,
+        parent,
+        categoryName,
+        description,
+        originalStatus,
+        status,
+        imageFiles
+    });
+
+
+    const catId = useMemo( // почемуто после редактирования категории или ее свойств, params меняется. Пришлось поместить в useMemo, что небыло ререндера 
+        function() {
+            return params.categoryId;
+        },
+        [params]
+    );
 
 
     const getCategory = useCallback(
         async function() {
             try {
-                const response = await CategoryServices.getOne(params.categoryId!);
+                const response = await CategoryServices.getOne(catId!); // Если сюда поместить params.categoryId напрямую, будет лишний ререндер.
                 const category = response.data;           
     
                 if (category) {
@@ -71,7 +86,9 @@ function EditCategory() {
                     if (category.parent) {
                         setParent(category.parent);
                     }
-        
+                    if (category.brands) {
+                        setCategoryBrands(category.brands);
+                    }
                     if (category.properties) {
                         const uiProps: IUIProperty[] = category.properties.map((prop) => {
         
@@ -109,15 +126,22 @@ function EditCategory() {
                 setIsLoading(false);
             }
         },
-        [params, dispatch]
+        [dispatch, catId]
     );
     
  
     useEffect(() => {
         getCategory()
     }, [getCategory]);
-    
 
+
+    useEffect(
+        function() {
+            dispatch(getBrands());
+        },
+        [dispatch]
+    );
+    
     const categoryNameHandler = useCallback(
         function(e: ChangeEvent<HTMLInputElement>) {
             setCategoryName(() => {
@@ -179,6 +203,22 @@ function EditCategory() {
         },
         [description]
     );
+
+
+    const showBrandsModal = useCallback(
+        function() {
+            setIsShowBrandsModal(true);
+        },
+        []
+    );
+
+
+    const hideBrandsModal = useCallback(
+        function() {
+            setIsShowBrandsModal(false);
+        },
+        []
+    );
    
 
     const selectImage = useCallback(
@@ -191,6 +231,27 @@ function EditCategory() {
     const removeImage = useCallback(
         function removeImage(newFileList: FileList) {
             setImageFiles(newFileList);
+        },
+        []
+    );
+
+
+    const selectBrandHandler = useCallback(
+        function(brand: DBBrand) {
+            const prevBrands = [...categoryBrands];
+            const duplicateBrandIdx = prevBrands.findIndex((item) => item._id === brand._id);
+            if ( duplicateBrandIdx > -1 ) prevBrands.splice(duplicateBrandIdx, 1);
+            else prevBrands.push(brand);
+
+            setCategoryBrands(prevBrands);
+        },
+        [categoryBrands]
+    );
+
+
+    const clearSelectedBrands = useCallback(
+        function() {
+            setCategoryBrands([]);
         },
         []
     );
@@ -265,7 +326,7 @@ function EditCategory() {
 
     const showModal = useCallback(
         function() {
-            setIsShowModal(true);
+            setIsShowCategoriesListModal(true);
         }, 
         []
     );
@@ -273,7 +334,7 @@ function EditCategory() {
 
     const hideModal = useCallback(
         function hideModal() {
-            setIsShowModal(false);
+            setIsShowCategoriesListModal(false);
         }, 
         []
     );
@@ -283,7 +344,7 @@ function EditCategory() {
         function(category: IUICategory) {
             setParentMessage('');
             setParent({_id: category._id, name: category.name});
-            setIsShowModal(false);
+            setIsShowCategoriesListModal(false);
         },
         []
     );
@@ -328,7 +389,7 @@ function EditCategory() {
                     inputSettings: item.inputSettings,
                 }
     
-                if (item.inputSettings.inputType !== 'Boolean' && item.filterChoices && item.filterChoices.length > 0) {
+                if (item.filterChoices && item.filterChoices.length > 0) {
                     prop.filterChoices = item.filterChoices.map((choice) => {
                         return {
                             name: choice.name,
@@ -346,7 +407,11 @@ function EditCategory() {
                 description: description.value,
                 status: status!,
             }
-    
+
+            if (status === 'leaf') {
+                category.brands = categoryBrands.map((brand) => brand._id);
+            }   
+
             const formData = new FormData();
             formData.append('category', JSON.stringify(category));
             formData.append('props', JSON.stringify(props));
@@ -356,7 +421,7 @@ function EditCategory() {
     
             return formData;
         },
-        [categoryId, parent._id, categoryName.value, description.value, imageFiles, properties, status]
+        [categoryId, parent._id, categoryName.value, description.value, imageFiles, properties, status, categoryBrands]
     );
     
     
@@ -475,33 +540,54 @@ function EditCategory() {
 
                 {
                     status === 'leaf' ? 
-                    <div className="edit-properties mb-2">
-                        <div className='d-flex mb-2'>
-                            <Button className="btn-sm btn-secondary me-2" onClick={addPropertyBtn}>Add property</Button>
+
+                    <>
+                         <div className="brands-box mb-2">
+                            <MultiSelect 
+                                idKey="_id"
+                                labelKey="name"
+                                title='Brands'
+                                options={brands}
+                                selectedOptions={categoryBrands}
+                                onSelect={selectBrandHandler}
+                                onUnselect={selectBrandHandler}
+                                onClear={clearSelectedBrands}
+                            />
+                            <Button 
+                                className="brands-btn btn-sm btn-secondary"
+                                onClick={showBrandsModal}
+                            >Brands</Button>
                         </div>
-                        <div>
-                            {
-                                properties.map((prop, index) => {
-                                    return (
-                                        <CategoryProperty 
-                                            key={prop.key}
-                                            property={prop} 
-                                            // property={JSON.stringify(prop)} 
-                                            propIndex={index}
-                                            onChangeProperty={onChangeProperty}
-                                            onDeleteProperty={onDeleteProperty}
-                                        />
-                                    )
-                                })
-                            }
+
+                        <div className="edit-properties mb-2">
+                            <div className='d-flex mb-2'>
+                                <Button className="btn-sm btn-secondary me-2" onClick={addPropertyBtn}>Add property</Button>
+                            </div>
+                            <div>
+                                {
+                                    properties.map((prop, index) => {
+                                        return (
+                                            <CategoryProperty 
+                                                key={prop.key}
+                                                property={prop} 
+                                                // property={JSON.stringify(prop)} 
+                                                propIndex={index}
+                                                onChangeProperty={onChangeProperty}
+                                                onDeleteProperty={onDeleteProperty}
+                                            />
+                                        )
+                                    })
+                                }
+                            </div>
                         </div>
-                    </div> : 
+                    </>
+                     : 
                     ''
                 }
                 <Button type="submit" className="btn-sm btn-success">Submit</Button>
             </form>   
             {
-                isShowModal && 
+                isShowCategoriesListModal  && 
                 <CategoriesListModal 
                     hideModal={hideModal} 
                     checkbox={true} 
@@ -512,6 +598,13 @@ function EditCategory() {
                     multipleChecked={false}
                 />
             }      
+
+            {
+                isShowBrandsModal ? 
+                <BrandsModal
+                    onBackdropClick={hideBrandsModal}
+                /> : ''
+            } 
         </div> :
         <div>Category not found</div>
     )

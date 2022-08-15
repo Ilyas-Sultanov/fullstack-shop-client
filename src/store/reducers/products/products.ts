@@ -1,13 +1,14 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {IProductsData} from '../../../types/Products';
 
-interface IProductsTableState {
+interface IProductsState {
     productsIsLoading: boolean
     highestPrice: number
     productsData: IProductsData
+    isShowFilter: boolean
 }
 
-const initialState: IProductsTableState = {
+const initialState: IProductsState = {
     productsIsLoading: false,
     highestPrice: 1,
     productsData: {
@@ -17,10 +18,11 @@ const initialState: IProductsTableState = {
         link: '',
         data: [],
     },
+    isShowFilter: false,
 }
 
 const productsSlice = createSlice({
-    name: 'productList',
+    name: 'products',
     initialState,
     reducers: {
         setProductsIsLoading(state, action:PayloadAction<boolean>) {
@@ -29,10 +31,12 @@ const productsSlice = createSlice({
         setHighestPrice(state, action:PayloadAction<number>) {
             state.highestPrice = action.payload;
         },
-        getManySuccess(state, action: PayloadAction<IProductsData>) {
+        setProducts(state, action: PayloadAction<IProductsData>) {
             state.productsData = action.payload;
         },
-
+        setIsShowFilter(state, action: PayloadAction<boolean>) {
+            state.isShowFilter = action.payload;
+        },
     }
 });
 

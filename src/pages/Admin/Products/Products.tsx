@@ -9,14 +9,14 @@ function Products() {
     const location = useLocation();
 
     return (
-        <div className="products h-100 overflow-auto d-flex flex-column">
+        <div className="admin-products">
             {
                 location.pathname === '/admin/products' ? 
                 <Link to="create" className="btn btn-primary btn-sm mb-2 align-self-start">Create product</Link> : 
                 ''
             }
             
-            <div className="products__content flex-grow-1">
+            <div className="products__content">
                 <Routes>
                     <Route 
                         path='' 

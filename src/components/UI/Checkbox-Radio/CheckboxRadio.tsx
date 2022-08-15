@@ -14,10 +14,17 @@ interface checkboxRadioProps extends InputHTMLAttributes<HTMLInputElement> {
 
 function CheckboxRadio({type, name, label, value, onChange, checked, className}: checkboxRadioProps) {
     return (
-        <div className={`form-check ${className}`}>
+        <div className={`form-check ${className ? className : ''}`}>
             <label className="form-check-label">
                 {label}
-                <input className="form-check-input" type={type} name={name} value={value} checked={checked} onChange={onChange}/>
+                <input 
+                    className="form-check-input" 
+                    type={type} 
+                    name={name} 
+                    value={value} 
+                    checked={checked} 
+                    onChange={onChange}
+                />
             </label>
         </div>
     )

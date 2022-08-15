@@ -1,5 +1,6 @@
 import './BrandsModal.scss';
-import { useState, useCallback, ChangeEvent, FocusEvent } from 'react';
+import { useState, useCallback, ChangeEvent, FocusEvent, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { DBBrand } from '../../../types/Brand';
 import { ReactComponent as CreateIcon } from '../../../img/plus-square.svg';
 import { ReactComponent as EditIcon } from '../../../img/pencil-square.svg';
@@ -9,22 +10,32 @@ import Modal from '../.././../components/UI/Modal/Modal';
 import Button from '../../../components/UI/Button/Button';
 import Input from '../../../components/UI/Input/Input';
 import SelectWithSearch, { ISelectOption } from '../../../components/UI/SelectWithSearch/SelectWithSearch';
+import { createBrand, getBrands, editBrand, deleteBrand } from '../../../store/reducers/brands/brandsActionCreators';
+import { RootState } from '../../../store/store';
+// import useWhyDidYouUpdate from '../../../hooks/useWhyDidYouUpdate';
 
 type BrandsModalProps = {
-    isLoading: boolean
-    brands: DBBrand[]
-    onCreateBrand: (name: string) => void
-    onEditBrand: (name: string, brandId: string) => void
-    onDeleteBrand: (brandId: string) => void
     onBackdropClick: () => void
 }
 
 type BrandsModalInputsType = {value: string, isDirty: boolean, messages: Array<string>};
 
-function BrandsModal({isLoading, brands, onCreateBrand, onEditBrand, onDeleteBrand, onBackdropClick}: BrandsModalProps) {
+function BrandsModal({onBackdropClick}: BrandsModalProps) {
+    const dispatch = useDispatch();
+    const {brands, brandsIsLoading} = useSelector((state: RootState) => state.brands);
     const [selectedBrand, setSelectedBrand] = useState<DBBrand>();
+
     const [createInput, setCreateInput] = useState<BrandsModalInputsType>({value: '', isDirty: false, messages: []});
     const [editInput, setEditInput] = useState<BrandsModalInputsType>({value: '', isDirty: false, messages: []});
+
+    // useWhyDidYouUpdate('BrandsModal', {brands, selectedBrand, createInput, editInput});
+
+    useEffect(
+        function() {
+            dispatch(getBrands());
+        },
+        [dispatch]
+    );
   
     const selectBrand = useCallback(
         function(selectedOption?: ISelectOption) {
@@ -99,30 +110,35 @@ function BrandsModal({isLoading, brands, onCreateBrand, onEditBrand, onDeleteBra
 
     const createBrandHandler = useCallback(
         function() {
-            onCreateBrand(createInput.value);
+            dispatch(createBrand(createInput.value));
             setCreateInput({value: '', isDirty: false, messages: []});
         }, 
-        [createInput.value, onCreateBrand]
+        [createInput.value, dispatch]
     );
 
 
     const editBrandHandler = useCallback(
         function() {
-            if (selectedBrand) onEditBrand(editInput.value, selectedBrand._id);
+            if (selectedBrand) {
+                dispatch(editBrand(selectedBrand._id, editInput.value));
+            } 
+
             setEditInput({value: '', isDirty: false, messages: []});
             setSelectedBrand(undefined);
         }, 
-        [editInput.value, selectedBrand, onEditBrand]
+        [editInput.value, selectedBrand, dispatch]
     );
 
 
     const deleteBrandHandler = useCallback(
         function() {
-            if (selectedBrand) onDeleteBrand(selectedBrand._id);
+            if (selectedBrand) {
+                dispatch(deleteBrand(selectedBrand._id));
+            } 
             setEditInput({value: '', isDirty: false, messages: []});
             setSelectedBrand(undefined);
         }, 
-        [selectedBrand, onDeleteBrand]
+        [selectedBrand, dispatch]
     );
 
 
@@ -132,7 +148,7 @@ function BrandsModal({isLoading, brands, onCreateBrand, onEditBrand, onDeleteBra
             onBackdropClick={() => {}}
         >
             {
-                isLoading ? 
+                brandsIsLoading ? 
                 <Spinner/> :
                 <>
                     <div className='wrapper'>

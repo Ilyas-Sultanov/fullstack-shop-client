@@ -1,4 +1,4 @@
-.products {
+.admin-products {
     // убираем стрелочки у input type number
     /* Chrome, Safari, Edge, Opera */
     input::-webkit-outer-spin-button,
@@ -14,17 +14,41 @@
     // =========
 
     & {
-        padding: 5px;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .products__content {
+        width: 100%;
+        max-width: 100%;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .table-responsive {
+        flex-grow: 1;
+        margin-bottom: 10px;
     }
 
     .products-table {
+        & {
+            height: 1px;  // Внимание! Это нужно чтобы td {height: 100%} работало. (Why 1px? No idea.)
+            margin-bottom: 0;
+        }
+        
         thead td {
             vertical-align: middle;
         }
 
         .action-buttons {
+            height: 100%;
             display: flex;
             justify-content: center;
+            align-items: center;
             column-gap: 5px;
 
             button {

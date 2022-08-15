@@ -21,7 +21,7 @@ function CategoriesList() {
     const [categoryForContextMenu, setCategoryForContextMenu] = useState({_id: '', status: ''});
 
     const getCategories = useCallback(
-        async function getCategories() {
+        async function() {
             try {
                 const response = await CategoryServices.getAll();
                 const cats = response.data;

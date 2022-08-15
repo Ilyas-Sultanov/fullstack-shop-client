@@ -11,7 +11,7 @@ import {ReactComponent as EditIcon} from '../../../img/pencil-square.svg';
 import Pagination from '../../../components/UI/Pagination/Pagination';
 import Input from '../../../components/UI/Input/Input';
 import Button from '../../../components/UI/Button/Button';
-import DatePicker, { DatePickerSelectedDates } from '../../../components/UI/DatePicker/DatePicker';
+import DatePicker, { DatePickerSelectedDates } from '../../../components/DatePicker/DatePicker';
 import RangeSlider from '../../../components/UI/RangeSlider/RangeSlider';
 import SelectWithSearch, {ISelectOption} from '../../../components/UI/SelectWithSearch/SelectWithSearch';
 import CategoriesListModal from '../Categories/CategoriesListModal';
@@ -105,11 +105,10 @@ function ProductsTable() {
 
 
     const priceRangeHandler = useCallback((values: Array<number>) => {
-        const query = Object.fromEntries([...searchParams]); // преобразуем query параметры в объект
-        query.page = '1'; // при изменениях в фильтре, всегда меняем страницу на первую
-        query.minPrice = String(values[0]);
-        query.maxPrice = String(values[1]);
-        setSearchParams(query);
+        searchParams.set('page', '1');
+        searchParams.set('price[gte]', String(values[0]));
+        searchParams.set('price[lte]', String(values[1]));
+        setSearchParams(searchParams);
     }, [searchParams, setSearchParams]);
 
 
@@ -152,12 +151,10 @@ function ProductsTable() {
 
 
     const searchByQuantity = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-        const query = Object.fromEntries([...searchParams]);
-        query.page = '1';
         const value = e.target.value;
-        if (value && Number(value) > -1) query.quantityLTE = value;
-        else delete query.quantityLTE;
-        setSearchParams(query);
+        if (value === '') searchParams.delete('quantity[lte]');
+        else if (Number(value) > -1) searchParams.set('quantity[lte]', value);
+        setSearchParams(searchParams);
     }, [searchParams, setSearchParams]);
 
 
@@ -280,175 +277,174 @@ function ProductsTable() {
 
     return (
         <Fragment>
-
-        <div className="h-100 d-flex flex-column products-container">
-            {
-                <div className="table-responsive h-100 mb-2">
-                    <table className="table table-sm table-striped table-bordered products-table">
-                        <thead>
-                            <tr>
-                                { 
-                                    columns.map((column) => {
-                                        return (
-                                            <th key={ column.name } onClick={() => sortHandler(column.name)}>
-                                                <span className="me-2">{ column.label }</span>
-                                                {
-                                                    (searchParams.get('sort') === column.name && searchParams.get('order') === '1') ? 
-                                                    <ChevronIcon className='chevronIcon--ascending'/> :
-                                                    (searchParams.get('sort') === column.name && searchParams.get('order') === '-1') ?
-                                                    <ChevronIcon className='chevronIcon--descending'/> :
-                                                    ''
-                                                }
-                                            </th>
-                                        )
-                                    }) 
-                                }
-                            </tr>
-                            <tr>
-                                <td>
-                                    <Input
-                                        name="_id" 
-                                        type="search" 
-                                        value={searchParams.get("_id") || ""}
-                                        onChange={searchById}
-                                    />
-                                </td>
-                                <td>
-                                    <div style={{width: '150px'}}>
-                                        <SelectWithSearch
-                                            idKey='_id'
-                                            labelKey='name'
-                                            options={brands}
-                                            placeholder='All'
-                                            onChange={searchByBrand}
-                                            selectedOption={selectedBrand}
-                                        />
-                                    </div>
-                                </td>
-                                <td>
-                                    <Input
-                                        name="name" 
-                                        type="search"
-                                        value={searchParams.get('name') || ""}
-                                        onChange={searchByName}
-                                    />
-                                </td>
-                                <td>
-                                    <div style={{width: '150px', padding: '0 15px'}}>
-                                        <RangeSlider
-                                            min={0}
-                                            max={highestPrice !== 1 ? highestPrice : searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : 2} 
-                                            /**
-                                             * По умолчанию highestPrice === 1, потом с сервера приходит актуальное значение,
-                                             * т.е. если еще не пришло актуальное значение, мы устанавливаем max = maxPrice,
-                                             * (чтобы валидатор не ругался на минимальное значение если оно больше 1),
-                                             * если highestPrice с сервера еще не пришло и нет maxPrice, делаем значение = 2, 
-                                             * (2>1 и валидатор доволен, 1 - это размер шага (step) по умолчанию).
-                                             */
-                                            values={[
-                                                searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : 0,
-                                                searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : highestPrice,
-                                            ]}
-                                            bar={true}
-                                            tip={true}
-                                            onChangeValues={priceRangeHandler}
-                                        />
-                                    </div>
-                                </td>
-                                {/* <td>
-                                    <RangeSlider/> rating
-                                </td> */}
-                                <td>
-                                    <div className='category-btns'>
-                                        <Button 
-                                            className='btn-sm btn-primary'
-                                            onClick={toggleCategoriesModal}
-                                        >
-                                            Categories
-                                        </Button>
-                                        <Button 
-                                            className='btn-sm btn-secondary'
-                                            onClick={() => searchByCategory()}
-                                        >
-                                            Clear
-                                        </Button>
-                                    </div>
-                                </td>
-                                <td>
-                                    <Input
-                                        name="quantity" 
-                                        type="number"
-                                        min={0}
-                                        placeholder='lte'
-                                        value={searchParams.get('quantityLTE') || ""}
-                                        onChange={searchByQuantity}
-                                    />
-                                </td>
-                                <td>
-                                    <DatePicker 
-                                        onChange={searchByDate}
-                                        selectedDates={selectedDates}
-                                    />
-                                </td>
-                                <td key='filter-btn'> 
-                                    <Button 
-                                        className='btn-secondary btn-sm text-nowrap' 
-                                        onClick={clearAllFilters}
-                                    > 
-                                        Clear Filters
-                                    </Button> 
-                                </td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                uiProducts.length > 0 ?
-                                uiProducts.map((prod) => {
+        
+        {
+            <div className="table-responsive">
+                <table className="table table-sm table-striped table-bordered products-table">
+                    <thead>
+                        <tr>
+                            { 
+                                columns.map((column) => {
                                     return (
-                                        <tr key={prod._id}>
-                                            <td>{prod._id}</td>
-                                            <td>{prod.brand}</td>
-                                            <td>{prod.name}</td>
-                                            <td>{prod.price}</td>
-                                            {/* <td>{prod.rating}</td> */} 
-                                            <td>{prod.category}</td>
-                                            <td>{prod.quantity}</td>
-                                            <td>{prod.createdAt}</td>
-                                            <td className='action-buttons'> 
-                                                <Button 
-                                                    className="btn-warning btn-sm" 
-                                                    onClick={() => navToEditPage(prod._id)} 
-                                                    value={prod._id}
-                                                ><EditIcon/></Button>
-                                                <Button 
-                                                    className="btn-danger btn-sm" 
-                                                    onClick={() => deleteHandler(prod._id)} 
-                                                    value={prod._id}
-                                                ><DeleteIcon/></Button>
-                                            </td>
-                                        </tr>
+                                        <th key={ column.name } onClick={() => sortHandler(column.name)}>
+                                            <span className="me-2">{ column.label }</span>
+                                            {
+                                                (searchParams.get('sort') === column.name && searchParams.get('order') === '1') ? 
+                                                <ChevronIcon className='chevronIcon--ascending'/> :
+                                                (searchParams.get('sort') === column.name && searchParams.get('order') === '-1') ?
+                                                <ChevronIcon className='chevronIcon--descending'/> :
+                                                ''
+                                            }
+                                        </th>
                                     )
-                                }) :
-                                <tr><td>Products not found</td></tr>
+                                }) 
                             }
-                        </tbody>
-                    </table>
-                </div> 
-            }
+                        </tr>
+                        <tr>
+                            <td>
+                                <Input
+                                    name="_id" 
+                                    type="search" 
+                                    value={searchParams.get("_id") || ""}
+                                    onChange={searchById}
+                                />
+                            </td>
+                            <td>
+                                <div style={{width: '150px'}}>
+                                    <SelectWithSearch
+                                        idKey='_id'
+                                        labelKey='name'
+                                        options={brands}
+                                        placeholder='All'
+                                        onChange={searchByBrand}
+                                        selectedOption={selectedBrand}
+                                    />
+                                </div>
+                            </td>
+                            <td>
+                                <Input
+                                    name="name" 
+                                    type="search"
+                                    value={searchParams.get('name') || ""}
+                                    onChange={searchByName}
+                                />
+                            </td>
+                            <td>
+                                <div style={{width: '150px', padding: '0 15px'}}>
+                                    <RangeSlider
+                                        min={0}
+                                        max={highestPrice !== 1 ? highestPrice : searchParams.get('price[gte]') ? Number(searchParams.get('price[lte]')) : 2} 
+                                        /**
+                                         * По умолчанию highestPrice === 1, потом с сервера приходит актуальное значение,
+                                         * т.е. если еще не пришло актуальное значение, мы устанавливаем max = maxPrice,
+                                         * (чтобы валидатор не ругался на минимальное значение если оно больше 1),
+                                         * если highestPrice с сервера еще не пришло и нет maxPrice, делаем значение = 2, 
+                                         * (2>1 и валидатор доволен, 1 - это размер шага (step) по умолчанию).
+                                         */
+                                        values={[
+                                            searchParams.get('price[gte]') ? Number(searchParams.get('price[gte]')) : 0,
+                                            searchParams.get('price[lte]') ? Number(searchParams.get('price[lte]')) : highestPrice,
+                                        ]}
+                                        bar={true}
+                                        tip={true}
+                                        onChangeValues={priceRangeHandler}
+                                    />
+                                </div>
+                            </td>
+                            {/* <td>
+                                <RangeSlider/> rating
+                            </td> */}
+                            <td>
+                                <div className='category-btns'>
+                                    <Button 
+                                        className='btn-sm btn-primary'
+                                        onClick={toggleCategoriesModal}
+                                    >
+                                        Categories
+                                    </Button>
+                                    <Button 
+                                        className='btn-sm btn-secondary'
+                                        onClick={() => searchByCategory()}
+                                    >
+                                        Clear
+                                    </Button>
+                                </div>
+                            </td>
+                            <td>
+                                <Input
+                                    name="quantity" 
+                                    type="number"
+                                    min={0}
+                                    placeholder='lte'
+                                    value={searchParams.get('quantity[lte]') || ""}
+                                    onChange={searchByQuantity}
+                                />
+                            </td>
+                            <td>
+                                <DatePicker 
+                                    onChange={searchByDate}
+                                    selectedDates={selectedDates}
+                                />
+                            </td>
+                            <td key='filter-btn'> 
+                                <Button 
+                                    className='btn-secondary btn-sm text-nowrap' 
+                                    onClick={clearAllFilters}
+                                > 
+                                    Clear Filters
+                                </Button> 
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            uiProducts.length > 0 ?
+                            uiProducts.map((prod) => {
+                                return (
+                                    <tr key={prod._id}>
+                                        <td>{prod._id}</td>
+                                        <td>{prod.brand}</td>
+                                        <td>{prod.name}</td>
+                                        <td>{prod.price}</td>
+                                        {/* <td>{prod.rating}</td> */} 
+                                        <td>{prod.category}</td>
+                                        <td>{prod.quantity}</td>
+                                        <td>{prod.createdAt}</td>
+                                        <td className='action-buttons'> 
+                                            <Button 
+                                                className="btn-warning btn-sm" 
+                                                onClick={() => navToEditPage(prod._id)} 
+                                                value={prod._id}
+                                            ><EditIcon/></Button>
+                                            <Button 
+                                                className="btn-danger btn-sm" 
+                                                onClick={() => deleteHandler(prod._id)} 
+                                                value={prod._id}
+                                            ><DeleteIcon/></Button>
+                                        </td>
+                                    </tr>
+                                )
+                            }) :
+                            <tr><td>Products not found</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div> 
+        }
 
-            {
-                productsData.data.length > 0 ?
-                <Pagination 
-                    limit={productsData.limit} 
-                    currentPage={productsData.currentPage}
-                    totalDocuments={productsData.totalNumberOfMatches}
-                    siblingsCount={4}
-                    onChangePage={changePage}
-                    onChangePerPage={changePerPage}
-                /> : 
-                ''
-            }               	
-        </div>
+        {
+            productsData.data.length > 0 ?
+            <Pagination 
+                limit={productsData.limit} 
+                currentPage={productsData.currentPage}
+                totalDocuments={productsData.totalNumberOfMatches}
+                siblingsCount={4}
+                onChangePage={changePage}
+                onChangePerPage={changePerPage}
+            /> : 
+            ''
+        }               	
+
         
 
         {

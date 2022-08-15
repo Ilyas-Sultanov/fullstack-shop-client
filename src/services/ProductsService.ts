@@ -1,6 +1,6 @@
 import api from "../http";
 import {AxiosResponse} from "axios";
-import {IProductsData, IDBProduct} from "../types/Products";
+import {IProductsData, IPreparedForUIProduct} from "../types/Products";
 
 class ProductsService {
     static async createProduct(formData: FormData): Promise<AxiosResponse> {
@@ -20,8 +20,8 @@ class ProductsService {
     }
 
 
-    static async getOne(productId: string): Promise<AxiosResponse<IDBProduct>> {
-        return api.get<IDBProduct>(`/products/${productId}`);
+    static async getOne(productId: string): Promise<AxiosResponse<IPreparedForUIProduct>> {
+        return api.get<IPreparedForUIProduct>(`/products/${productId}`);
     }
 
 
@@ -40,8 +40,17 @@ class ProductsService {
         return result;
     }
 
-    static async getHighestPrice(): Promise<AxiosResponse<number>> {
-        const result = await api.get<number>('/products/highestPrice');
+    static async getHighestPrice(categoryId?: string): Promise<AxiosResponse<number>> {
+        /**
+         * Получаем значение для параметра max у RangeSlider.
+         * Если categoryId передано то это вызов из публичной страницы products, 
+         * и самая высокая цена нужна для товаров определённой категории.
+         * Если categoryId не передано, то это вызов из админки,
+         * и самая высокая цена среди всех товаров.
+         */
+        let reqStr = '/products/highestPrice';
+        if (categoryId) reqStr = reqStr + `?categoryId=${categoryId}`;
+        const result = await api.get<number>(reqStr);
         return result
     }
 }

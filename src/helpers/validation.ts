@@ -5,6 +5,8 @@ export type validationType = {
     isEmail?: boolean,
     isMatch?: {value: string, message: string},
     isDate?: boolean,
+    // min?: number,
+    // max?: number,
 }
 
 function validation(value: string, validations: validationType) {
@@ -31,6 +33,12 @@ function validation(value: string, validations: validationType) {
             case 'isDate':
                 if(isNaN(Date.parse(value))) messages.push('Не валидная строка');
                 break;
+            // case 'min':
+            //     if(Number(value) <= validations[v]!) messages.push(`Число не может быть меньше ${validations[v]}`);
+            //     break;
+            // case 'max':
+            //     if(Number(value) >= validations[v]!) messages.push(`Число не может быть больше ${validations[v]}`);
+            //     break;
         }
     }
 

@@ -4,33 +4,28 @@ import {useSelector, useDispatch} from 'react-redux';
 import {RootState} from '../../../store/store';
 import {createProductActions} from '../../../store/reducers/products/createProduct';
 import {getCategory, createProduct} from '../../../store/reducers/products/productsTableActionCreators';
-import { createBrand, getBrands, editBrand, deleteBrand } from '../../../store/reducers/brands/brandsActionCreators';
+import { getBrands } from '../../../store/reducers/brands/brandsActionCreators';
 import CategoriesListModal from "../Categories/CategoriesListModal";
-import BrandsModal from './brandsModal';
 import Button from '../../../components/UI/Button/Button';
 import Input from '../../../components/UI/Input/Input';
 import TextArea from '../../../components/UI/TextArea/TextArea';
 import Card from '../../../components/UI/Card/Card';
-import { IUICategory } from '../../../types/CategoryTypes';
+import { IUICategory, FilterChoiceValue } from '../../../types/CategoryTypes';
 import { ChangeEvent, FormEvent } from 'react';
-import CheckboxRadio from '../../../components/UI/Checkbox-Radio/CheckboxRadio';
 import SelectWithSearch, {ISelectOption} from '../../../components/UI/SelectWithSearch/SelectWithSearch';
-import UploadImages from '../../../components/UI/UploadImages/UploadImages';
+import UploadImages from '../../../components/UploadImages/UploadImages';
 import { ICreateProductObj } from '../../../types/Products';
 import Spinner from '../../../components/UI/Spninner/Spinner';
+import ProductProperty from './ProductProperty';
 
 function CreateProduct() {
     const dispatch = useDispatch();
     const {
         createProductIsLoading,
         isShowCategoryListModal,
-        isShowBrandsModal,
         product,
         isValid,
     } = useSelector((state: RootState) => state.createProduct);
-
-    const {brands, brandsIsLoading} = useSelector((state: RootState) => state.brands); 
-
     
     const showModal = useCallback(
         function() {
@@ -48,26 +43,10 @@ function CreateProduct() {
     );
   
 
-    const showBrandsModal = useCallback(
-        function() {
-            dispatch(createProductActions.setIsShowBrandsModal(true));
-        },
-        [dispatch]
-    );
-   
-
-    const hideBrandsModal = useCallback(
-        function() {
-            dispatch(createProductActions.setIsShowBrandsModal(false));
-        },
-        [dispatch]
-    );
-   
-
     const selectCategory = useCallback(
         function(category: IUICategory) {
             dispatch(createProductActions.setIsShowCategoryListModal(false));
-            dispatch(getCategory(category._id)); // внимание! диспатчим не сервис, а action creator
+            dispatch(getCategory(category._id));
         },
         [dispatch]
     );
@@ -103,36 +82,6 @@ function CreateProduct() {
         }, 
         [dispatch]
     );
-   
-
-    const createBrandHandler = useCallback(
-        function(name: string) {
-            dispatch(createBrand(name));
-        },
-        [dispatch]
-    );
-   
-
-    const editBrandHandler = useCallback(
-        function(name: string, brandId: string) {
-            const targetBrand = brands.find((brand) => {
-                return brand._id === brandId;
-            });
-            if (targetBrand) {
-                dispatch(editBrand(targetBrand._id, name));
-            }
-        },
-        [dispatch, brands]
-    );
-
-
-    const deleteBrandHandler = useCallback(
-        function(brandId: string) {
-            dispatch(deleteBrand(brandId));
-        },
-        [dispatch]
-    );
-   
 
 
     const selectBrand = useCallback(
@@ -172,44 +121,23 @@ function CreateProduct() {
         },
         [dispatch]
     );
-   
+    
 
-    const stringPropHandler = useCallback(
-        function(e: ChangeEvent<HTMLInputElement>, categoryPropId: string) {
-            const value = e.target.value;
-            dispatch(createProductActions.setPropValue({categoryPropId, value}));
-        },
-        [dispatch]
-    );
-  
-
-    const numericPropHandler = useCallback(
-        function(e: ChangeEvent<HTMLInputElement>, categoryPropId: string) {
-            const value = Number(e.target.value);
+    const changePropHandler = useCallback(
+        function(categoryPropId: string, value: FilterChoiceValue) {
             dispatch(createProductActions.setPropValue({categoryPropId, value}));
         },
         [dispatch]
     );
    
 
-    const booleanPropHandler = useCallback(
-        function(e: ChangeEvent<HTMLInputElement>, categoryPropId: string) {
-            const value = e.target.value === 'true' ? true : false;
-            dispatch(createProductActions.setPropValue({categoryPropId, value}));
-        },
-        [dispatch]
-    );
-   
-
-    const multiselectPropHandler = useCallback(
-        function(e: ChangeEvent<HTMLInputElement>, categoryPropId: string) {
-            const value = e.target.value;
+    const changeMultiselectPropHandler = useCallback(
+        function(categoryPropId: string, value: FilterChoiceValue) {
             dispatch(createProductActions.setMultiselectPropValue({categoryPropId, value}));
         },
         [dispatch]
     );
    
-
     
     function submitHandler(e: FormEvent) {
         e.preventDefault();
@@ -238,12 +166,18 @@ function CreateProduct() {
      */
     useEffect(() => {
         if (isValid) {
-            const props = product.properties.map((prop) => {
-                return {
-                    categoryPropId: prop.categoryPropId,
-                    value: prop.value
-                }
-            });
+            // const props: Array<IPreparedForUIProperty> = product.properties.map((prop) => {
+            //     return {
+            //         categoryPropId: prop.categoryPropId,
+            //         value: prop.value,
+            //         name: prop.name,
+            //         filterable: prop.filterable,
+            //         filterChoices: prop.filterChoices,
+            //         unit: prop.unit,
+            //         inputSettings: prop.inputSettings,
+            //         validationMessages: prop.validationMessages,
+            //     }
+            // });
     
             const newProduct: ICreateProductObj = {
                 name: product.name,
@@ -254,7 +188,7 @@ function CreateProduct() {
                 warranty: product.warranty,
                 quantity: product.quantity,
                 // rating: product.rating,
-                properties: props
+                properties: product.properties,
             }
 
             const formData = new FormData();
@@ -280,7 +214,7 @@ function CreateProduct() {
                     <Button className='btn-secondary btn-sm' onClick={showModal}>Select</Button>
                     {
                         product.validationMessages.category && product.validationMessages.category.length > 0 ? 
-                        product.validationMessages.category.map((msg, index) => <div key={index} className="invalid-feedback">{msg}</div>) : ''
+                        product.validationMessages.category.map((msg, index) => <div key={index} className="invalid-feedback d-block">{msg}</div>) : ''
                     }
                 </Card>
 
@@ -312,7 +246,7 @@ function CreateProduct() {
 
                 <div className='mb-2 d-flex align-items-end'>
                     {
-                        brandsIsLoading ? <Spinner/> :
+                        product.category._id &&
                         <>
                             <SelectWithSearch 
                                 idKey='_id'
@@ -320,15 +254,17 @@ function CreateProduct() {
                                 title='Select brand'
                                 placeholder=''
                                 onChange={selectBrand}
-                                options={brands}
+                                options={product.category.brands}
                                 selectedOption={product.brand} // value
                             />
-                            <Button className='btn-sm btn-secondary ms-2' onClick={showBrandsModal}>Brands</Button>
+                            {
+                                product.validationMessages.brand &&
+                                <div className="invalid-feedback d-block ms-2">{product.validationMessages.brand}</div>
+                            }
                         </>
                     }
                 </div>
                 
-
                 <Input 
                     type='number'
                     step={0.1}
@@ -366,110 +302,12 @@ function CreateProduct() {
                     product.properties && product.properties.length > 0 ?
                     product.properties.map((prop, index) => {
                         return (
-                            <div key={index}>
-                                {
-                                    prop.type === 'String' && prop.filterable ?  // если пропс фильтруемый
-                                    <Card className='mb-2'>
-                                        <div>{prop.name}</div>
-                                        {
-                                            prop.filterChoices && prop.filterChoices.length > 0 ?
-                                            prop.filterChoices.map((choice, index) => {
-                                                return (
-                                                    <CheckboxRadio 
-                                                        key={index} 
-                                                        type={prop.isMultiselect ? 'checkbox' : 'radio'}
-                                                        name={prop.isMultiselect ? '' : prop.name} 
-                                                        label={choice.name} 
-                                                        value={choice.value.toString()}
-                                                        checked={
-                                                            prop.isMultiselect ? 
-                                                            (prop.value as string[]).includes(choice.value as string) : 
-                                                            choice.value === prop.value
-                                                        }
-                                                        onChange={(e) => {
-                                                            if (prop.isMultiselect) multiselectPropHandler(e, prop.categoryPropId)
-                                                            else stringPropHandler(e, prop.categoryPropId)
-                                                        }}
-                                                    />
-                                                )
-                                            }) : null
-                                        }
-                                        <div className='invalid-feedback d-block'>
-                                            {
-                                                prop.validationMessages.length > 0 ?
-                                                prop.validationMessages.map((msg, index) => {
-                                                    return (
-                                                        <div key={index}>{msg}</div>
-                                                    )
-                                                }): null
-                                            }
-                                        </div>
-                                    </Card> :
-                                    prop.type === 'Number' && prop.filterable ? 
-                                    <div className='mb-2'>
-                                        <div>{prop.name}</div>
-                                        {
-                                            prop.filterChoices && prop.filterChoices.length > 0 ?
-                                            <Input 
-                                                type='number' 
-                                                step={0.0000001}
-                                                name='' 
-                                                value={prop.value.toString()} 
-                                                onChange={(e) => numericPropHandler(e, prop.categoryPropId)}
-                                                // messages={prop.validationMessages.length > 0 ? prop.validationMessages : []}
-                                            /> :
-                                            prop.filterChoices ? prop.filterChoices.map((choice, index) => {
-                                                return (
-                                                    <CheckboxRadio 
-                                                        key={index} 
-                                                        type='radio' 
-                                                        name={prop.name} 
-                                                        label={choice.name} 
-                                                        value={choice.value.toString()} 
-                                                        checked={choice.value === prop.value}
-                                                        onChange={(e) => numericPropHandler(e, prop.categoryPropId)}
-                                                    />
-                                                )
-                                            }) : null
-                                        }
-                                        <div className='invalid-feedback d-block'>
-                                            {
-                                                prop.validationMessages.length > 0 ?
-                                                prop.validationMessages.map((msg) => {
-                                                    return (
-                                                        <div key={index}>{msg}</div>
-                                                    )
-                                                }): null
-                                            }
-                                        </div>
-                                    </div> :
-                                    prop.type === 'Boolean' ? // boolean не фильтруемый всегда
-                                    <Card className='mb-2'>
-                                        <div>{prop.name}</div>
-                                        <div>
-                                            <CheckboxRadio 
-                                                type='radio' 
-                                                name={prop.name} 
-                                                label='Yes'
-                                                value='true'
-                                                checked={prop.value === true}
-                                                onChange={(e) => {booleanPropHandler(e, prop.categoryPropId)}}
-                                            />
-                                            <CheckboxRadio 
-                                                type='radio' 
-                                                name={prop.name} 
-                                                label='No' 
-                                                value='false'
-                                                checked={prop.value === false || prop.value === ''}
-                                                onChange={(e) => booleanPropHandler(e, prop.categoryPropId)}
-                                            />
-                                        </div>
-                                    </Card> :
-                                    prop.type === 'Number' ? // если пропс не фильтруемый
-                                    <Input type='number' name='' label={prop.name} className='mb-2' onChange={(e) => numericPropHandler(e, prop.categoryPropId)}/> :
-                                    <Input type='text' name='' label={prop.name} className='mb-2' onChange={(e) => stringPropHandler(e, prop.categoryPropId)}/>
-                                }
-                            </div>
+                            <ProductProperty
+                                key={index}
+                                property={prop}
+                                onChangeProp={changePropHandler}
+                                onChangeMultiselectProp={changeMultiselectPropHandler}
+                            />
                         )
                     }) : null
                 }
@@ -489,21 +327,9 @@ function CreateProduct() {
                     checkbox={true} 
                     onCheck={selectCategory} 
                     multipleChecked={false}
-                    statuses={['leaf']}
+                    statuses={['leaf']} // Массив статусов, категории с такими статусами можно выбрать
                     checkedCategoryId={product.category._id}
                 />
-            }
-
-            {
-                isShowBrandsModal ? 
-                <BrandsModal
-                    isLoading={brandsIsLoading}
-                    brands={brands}
-                    onCreateBrand={createBrandHandler}
-                    onEditBrand={editBrandHandler}
-                    onDeleteBrand={deleteBrandHandler}
-                    onBackdropClick={hideBrandsModal}
-                /> : ''
             }
         </div>
     )

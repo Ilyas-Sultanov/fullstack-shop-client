@@ -4,7 +4,7 @@ import { useSearchParams, URLSearchParamsInit } from 'react-router-dom';
 import debounce from '../../../helpers/debounce';
 import Input from '../../../components/UI/Input/Input';
 import Button from '../../../components/UI/Button/Button';
-import DatePicker, { DatePickerSelectedDates } from '../../../components/UI/DatePicker/DatePicker';
+import DatePicker, { DatePickerSelectedDates } from '../../../components/DatePicker/DatePicker';
 import SelectWithSearch, {ISelectOption} from '../../../components/UI/SelectWithSearch/SelectWithSearch';
 import Spinner from '../../../components/UI/Spninner/Spinner';
 import EditUserModal from './EditUserModal/EditUserModal';
@@ -347,14 +347,14 @@ function Users() {
                                                     return <td key={ field }>{ item[field] }</td>  
                                                 })
                                             }
-                                            <td key='filter-buttons' className='d-flex align-items-center justify-content-center'> 
+                                            <td key='filter-buttons' className='action-buttons'> 
                                                 {
                                                     activeUserId === item._id ? 
                                                     <Spinner style={{width: '30px', height:"30px"}}/> : 
-                                                    <div className='action-buttons'>
+                                                    <>
                                                         <Button className="btn-warning btn-sm d-flex justify-content-senter align-items-center" onClick={() => editBtnHandler(item._id)}><EditIcon/></Button>
                                                         <Button className="btn-danger btn-sm d-flex justify-content-senter align-items-center" onClick={() => deleteUser(item._id)}><DeleteIcon/></Button>
-                                                    </div>
+                                                    </>
                                                 }
                                                 
                                             </td>

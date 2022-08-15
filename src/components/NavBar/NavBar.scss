@@ -8,7 +8,7 @@
             right: 0;
             position: absolute;
             z-index: 999;
-            padding: 0 15px;
+            padding: 0 15px 15px 15px;
         }
     }
 
@@ -31,18 +31,44 @@
             outline: 1px solid white;
         }
     }
+
+    .navbar-buttons {
+        display: flex;
+        column-gap: 10px;
+
+        svg {
+            fill: #fff;
+            height: 26px;
+            width: 26px;
+        }
+    }
+
+    .cart-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .cart-total {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        border-radius: 50%;
+        background-color: #0d6efd;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+    }
         
     .auth-btn {
         display: flex;
         align-items: center;
         justify-content: center;
     }
-    
-    .auth-icon {
-        width: 20px;
-        height: 20px;
-    }
-    
+        
     .user-btn {
         &:hover + .dropdown-menu {
             display: block;

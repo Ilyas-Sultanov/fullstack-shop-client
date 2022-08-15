@@ -1,10 +1,10 @@
 import './UploadImages.scss';
 import { ChangeEvent, MouseEvent, useRef, useState, useMemo, useCallback } from 'react';
-import Card from '../Card/Card';
-import Button from '../Button/Button';
-import { ReactComponent as CloseIcon } from '../../../img/x-lg.svg';
-import {bytesToSize} from '../../../helpers/bytesToSize';
-import useWhyDidYouUpdate from '../../../hooks/useWhyDidYouUpdate';
+import Card from '../UI/Card/Card';
+import Button from '../UI/Button/Button';
+import { ReactComponent as CloseIcon } from '../../img/x-lg.svg';
+import {bytesToSize} from '../../helpers/bytesToSize';
+import useWhyDidYouUpdate from '../../hooks/useWhyDidYouUpdate';
 
 interface UploadImagesProps {
     children?: never

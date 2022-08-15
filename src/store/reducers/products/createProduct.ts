@@ -1,13 +1,12 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import { IDBCategory, IUICategory } from '../../../types/CategoryTypes';
-import {IUIProductProperty, IProductProperty, IProductValidationMessages} from '../../../types/Products';
+import {IProductProperty, IProductValidationMessages, IPreparedForUIProperty} from '../../../types/Products';
 import {DBBrand} from '../../../types/Brand';
 
 interface ICreateProductState {
     createProductIsLoading: boolean
     isValid: boolean
     isShowCategoryListModal: boolean
-    isShowBrandsModal: boolean
     product: {
         name: string
         category: IDBCategory
@@ -19,7 +18,7 @@ interface ICreateProductState {
         quantity?: number
         rating?: number
         validationMessages: IProductValidationMessages
-        properties: IUIProductProperty[]
+        properties: IPreparedForUIProperty[]
     }
 }
 
@@ -27,7 +26,6 @@ const initialState: ICreateProductState = {
     createProductIsLoading: false,
     isValid: false,
     isShowCategoryListModal: false,
-    isShowBrandsModal: false,
     product: {
         name: '',
         category: {
@@ -37,6 +35,7 @@ const initialState: ICreateProductState = {
             status: 'leaf',
             parentId: '',
             properties: [],
+            brands: [],
         },
         description: '',
         images: undefined,
@@ -63,7 +62,7 @@ const createProductSlice = createSlice({
             const category = action.payload;
             state.product.category = category;
             if (category.properties && category.properties.length > 0) {
-                const props: IUIProductProperty[] = [];
+                const props: Array<IPreparedForUIProperty> = [];
                 for (let i=0; i<category.properties.length; i+=1) {
                     props.push({
                         categoryPropId: category.properties[i]._id!, // если категория типа root или branch, то у неё нет пропсов, поэтому ts ругается, но при создании продукта мы можем выбрать только категорию типа leaf, у которой есть пропсы
@@ -75,8 +74,8 @@ const createProductSlice = createSlice({
                         name: category.properties[i].name,
                         filterable: category.properties[i].filterable,
                         filterChoices: category.properties[i].filterChoices,
-                        type: category.properties[i].inputSettings.inputType,
-                        isMultiselect: category.properties[i].inputSettings.isMultiselect,
+                        unit: category.properties[i].unit,
+                        inputSettings: category.properties[i].inputSettings,
                         validationMessages: []
                     });
                 }
@@ -98,9 +97,6 @@ const createProductSlice = createSlice({
             const brand = action.payload;
             if (brand) state.product.brand = brand;
             else state.product.brand = undefined;
-        },
-        setIsShowBrandsModal(state, action: PayloadAction<boolean>) {
-            state.isShowBrandsModal = action.payload;
         },
         setImageFiles(state, action: PayloadAction<FileList>) {
             state.product.images = action.payload;
@@ -184,7 +180,7 @@ const createProductSlice = createSlice({
                 for (let i=0; i<props.length; i+=1) {
                     props[i].validationMessages = [];
                     const messages: string[] = [];
-                    if (props[i].type !== 'Boolean' && !props[i].value && props[i].value !== 0) messages.push('Required'); // Validation
+                    if (props[i].inputSettings.inputType !== 'Boolean' && !props[i].value && props[i].value !== 0) messages.push('Required'); // Validation
                     props[i].validationMessages = messages;
                     if (messages.length > 0) propsIsValid = false;
                 }
